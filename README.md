@@ -12,7 +12,7 @@ Plain HTML + one CSS file + one JS file. No framework, no build step, no `packag
 ## Stack
 
 - HTML/CSS/JS, no build tool
-- **Hosting target**: Netlify (auto-deploy from `main`)
+- **Hosting**: Cloudflare Workers Assets — auto-deploys from `main` via Cloudflare Workers Builds. Active URL: `https://lef-climbing.chris-shotwell.workers.dev/` (target custom domain: `lefclimbing.com`)
 - **Forms**: Netlify Forms — `contact.html` and `classes.html` are wired with `data-netlify` + honeypot
 - **Fonts**: League Spartan (display) + Inter (body) + JetBrains Mono (numerics) from Google Fonts
 - **No JS framework**. `script.js` handles mobile-nav toggle, sticky-header scroll state, `aria-current` on nav, year auto-fill, and an injected chat bubble
@@ -31,7 +31,7 @@ climb-with-us.html      day passes / memberships / gift cards (links to portal)
 waiver.html             redirect to portal waiver
 ```
 
-Plus `sitemap.xml`, `robots.txt`, `llms.txt`, `netlify.toml`, `_redirects`, favicons.
+Plus `sitemap.xml`, `robots.txt`, `llms.txt`, `wrangler.jsonc`, `_headers`, `_redirects`, favicons.
 
 ## Local dev
 
@@ -43,13 +43,13 @@ Then open <http://localhost:8000>. Any static server works.
 
 ## Deploy
 
-Netlify auto-deploys on every push to `main`:
+Cloudflare Workers Builds auto-deploys on every push to `main`:
 
-1. Connect the repo at <https://app.netlify.com> → "Add new site" → "Import from GitHub" → pick `mosaic-climbing/lef-climbing`.
-2. Build settings come from `netlify.toml` — publish dir `.`, no build command.
-3. Custom domain: Netlify dashboard → **Domain settings** → **Add custom domain** → `lefclimbing.com`. Update DNS at the registrar to point at Netlify.
+1. The `lef-climbing` Worker on Cloudflare is connected to `mosaic-climbing/lef-climbing` on GitHub. Each push to `main` kicks off a build that uploads the static assets in `.` (per `wrangler.jsonc`) to the Worker. `_headers` and `_redirects` are honored by Workers Assets.
+2. Check builds at <https://dash.cloudflare.com> → Workers & Pages → `lef-climbing` → **Deployments**.
+3. Custom domain: Cloudflare dashboard → Worker → **Settings** → **Domains & Routes** → add `lefclimbing.com`. Cutover playbook lives in [MIGRATION.md](MIGRATION.md).
 
-PRs auto-generate preview URLs.
+Don't run `wrangler deploy` locally — it bypasses Git history and the build pipeline. Pushing to `main` is the supported path.
 
 ## Workflow
 
@@ -57,8 +57,8 @@ This site is maintained collaboratively with Claude. The flow:
 
 1. Owner messages Claude what to change.
 2. Claude edits files, commits to `main`, pushes.
-3. Netlify auto-deploys in ~30 seconds.
-4. Rollback = one click in the Netlify dashboard.
+3. Cloudflare Workers Builds auto-deploys in ~30 seconds.
+4. Rollback = redeploy a previous build from the Cloudflare dashboard.
 
 ## Cache busting
 
@@ -68,7 +68,7 @@ This site is maintained collaboratively with Claude. The flow:
 for f in *.html; do sed -i '' 's/styles\.css?v=29/styles.css?v=1/g' "$f"; done
 ```
 
-Once on Netlify, this becomes optional — Netlify's `Cache-Control` headers (set in `netlify.toml`) handle it.
+Required regardless of host: `_headers` sets `Cache-Control: immutable, max-age=31536000` on `/styles.css` and `/script.js`, so browsers won't refetch without the `?v=N` change.
 
 ## SEO + AI discoverability
 
