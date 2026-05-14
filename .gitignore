@@ -1,0 +1,27 @@
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Surge artifacts (Surge.sh preview hosting retired; .surge/ would only
+# be regenerated if someone runs `surge` locally — keep it ignored)
+.surge/
+
+
+# Build / cache
+node_modules/
+.cache/
+.netlify/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example

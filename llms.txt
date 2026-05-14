@@ -1,0 +1,35 @@
+# LEF Climbing
+
+> Indoor climbing gym in Lexington, Kentucky. Bouldering, top-rope, lead, and auto-belay. Day passes are by reservation only.
+
+## Location & contact
+
+- Address: 916 N Broadway, Lexington, KY 40505
+- Phone: 859-523-0518
+- Email: info@lefclimbing.com
+- Hours: Mon–Fri 12pm–9pm, Sat 12pm–8pm, Sun 12pm–8pm (members-only 10am–12pm daily)
+- Areas served: Lexington, Nicholasville, Georgetown, Versailles, Richmond, Frankfort
+
+## Services
+
+- [Bouldering](https://www.lefclimbing.com/about#bouldering): Indoor bouldering walls with padded floors. No ropes, no harnesses, no partner required.
+- [Top-rope, auto-belay & lead](https://www.lefclimbing.com/about#ropes): Roped climbing on tall walls. Top-rope needs a belay partner; auto-belays don't. Lead climbing for advanced climbers.
+
+## Programs & instruction
+
+- [Classes](https://www.lefclimbing.com/classes): Instruction and class schedule. Full list at https://portal.lefclimbing.com/lef/n/classes.
+- [Memberships](https://www.lefclimbing.com/membership): Memberships with full facility access. Buy at https://portal.lefclimbing.com/lef/n/memberships.
+- [Day pass / climb with us](https://www.lefclimbing.com/climb-with-us): Reserve a day pass at https://portal.lefclimbing.com/lef/programs/day-pass-lef.
+- [Events calendar](https://www.lefclimbing.com/calendar): Hours, holiday closures, and upcoming events.
+- [Waiver](https://portal.lefclimbing.com/lef/agreements/lef-waiver): Sign before climbing.
+
+## Site
+
+- Home: https://www.lefclimbing.com/
+- About: https://www.lefclimbing.com/about
+- Classes: https://www.lefclimbing.com/classes
+- Membership: https://www.lefclimbing.com/membership
+- Calendar: https://www.lefclimbing.com/calendar
+- Contact: https://www.lefclimbing.com/contact
+- Climb With Us: https://www.lefclimbing.com/climb-with-us
+- Sitemap: https://www.lefclimbing.com/sitemap.xml

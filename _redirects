@@ -1,0 +1,14 @@
+# Cloudflare Workers Assets handles clean URLs automatically:
+# /about.html → 307 redirect to /about, and /about serves about.html.
+# Don't add /<route> → /<route>.html 200 entries here — they cause loops.
+
+# Legacy Wix anchor paths → new clean URLs (301 permanent redirect)
+# The Wix site was single-page with anchor links, so there are no deep
+# paths to map. Add entries here if Google's index reveals any once we
+# cut over.
+# Example:
+# /old-path  /new-path  301
+
+# Note: www → apex canonicalization is handled at the Cloudflare domain
+# level (Rules → Redirect Rules) once the custom domain is wired up
+# post-cutover. _redirects only accepts relative paths, not cross-host.
