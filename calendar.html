@@ -100,63 +100,47 @@
   </div>
 </header>
 
-<!-- TODO: review content with the LEF owner. Section copy below was inherited from the Mosaic template (sister gym) and may contain claims that do not apply to LEF Climbing yet — verify offerings, party services, program details, and pricing before launch. -->
 <main id="main">
 
   <section class="photo-hero photo-hero--page">
-    <picture><source media="(max-width: 800px)" srcset="images/bouldering-action.avif" type="image/avif" /><source srcset="images/bouldering-action.avif" type="image/avif" /><source srcset="images/bouldering-action.webp" type="image/webp" /><img src="images/bouldering-action.jpg" alt="A class climbing the overhang" width="1800" height="1200" fetchpriority="high" decoding="async" /></picture>
+    <picture><source srcset="images/bouldering-action.avif" type="image/avif" /><source srcset="images/bouldering-action.webp" type="image/webp" /><img src="images/bouldering-action.jpg" alt="A climber on the bouldering wall at LEF" width="1800" height="1200" fetchpriority="high" decoding="async" /></picture>
     <div class="wrap photo-hero__wrap">
-      <h1>Events</h1>
+      <h1>Calendar.</h1>
     </div>
   </section>
 
   <section class="section">
-    <div class="wrap">
-
-      <p class="lede" style="max-width: none;">Browse upcoming classes, workshops, programs, and member events on our full calendar.</p>
-      <div class="actions mt-5">
-        <a href="https://portal.lefclimbing.com/lef/n/calendar" rel="noopener" class="btn btn-primary btn-lg btn-arrow">View full calendar</a>
+    <div class="wrap cols cols-narrow-wide">
+      <div>
+        <h2>Hours.</h2>
       </div>
+      <div class="flow-loose">
+        <dl class="hours" style="font-size: var(--t-md);">
+          <dt>Mon — Fri</dt><dd>12pm — 9pm</dd>
+          <dt>Saturday</dt><dd>12pm — 8pm</dd>
+          <dt>Sunday</dt><dd>12pm — 8pm</dd>
+          <dt>Members only</dt><dd>10am — 12pm daily</dd>
+        </dl>
+        <h3 class="mt-7">Holiday closures.</h3>
+        <p>Closed April 5, 2026.</p>
+        <!-- TODO: owner to maintain holiday closure list (Christmas, July 4, etc.).
+             Currently mirroring the single holiday shown on the live Wix site. -->
+      </div>
+    </div>
+  </section>
 
-      <hr class="rule" />
-
-      <article class="ev">
-        <div>
-          <span class="when">Summer</span>
+  <section class="section section-bone-deep">
+    <div class="wrap cols cols-narrow-wide">
+      <div>
+        <h2>Events &amp; classes.</h2>
+      </div>
+      <div class="flow-loose">
+        <p class="lede">Class schedule, workshops, and member events are listed in the portal.</p>
+        <div class="actions mt-6">
+          <a href="https://portal.lefclimbing.com/lef/n/classes" rel="noopener" class="btn btn-primary btn-lg btn-arrow">Browse classes</a>
+          <a href="https://portal.lefclimbing.com/lef/n/calendar" rel="noopener" class="btn btn-ghost">Full calendar</a>
         </div>
-        <div>
-          <h2>SUMMER CAMP REGISTRATION IS OPEN</h2>
-        </div>
-        <div>
-          <a href="https://portal.lefclimbing.com/lef/programs/summer-camp?course=Q291cnNlOjkxMGE2MGYyN2Q5NjExMWRkYTJhYmU4NWI3MDVlZjBk&amp;date=2026-06-08" rel="noopener" class="btn btn-primary btn-arrow">Register Here</a>
-        </div>
-      </article>
-
-      <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Event",
-        "name": "LEF Climbing Summer Camp 2026",
-        "description": "Week-long summer climbing camps for kids at LEF Climbing in Lexington, Kentucky.",
-        "startDate": "2026-06-08",
-        "endDate": "2026-08-14",
-        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-        "eventStatus": "https://schema.org/EventScheduled",
-        "location": {
-          "@type": "Place",
-          "name": "LEF Climbing",
-          "address": {"@type": "PostalAddress", "streetAddress": "916 N Broadway", "addressLocality": "Lexington", "addressRegion": "KY", "postalCode": "40505", "addressCountry": "US"}
-        },
-        "organizer": {"@id": "https://www.lefclimbing.com/#business"},
-        "url": "https://portal.lefclimbing.com/lef/programs/summer-camp",
-        "offers": {
-          "@type": "Offer",
-          "url": "https://portal.lefclimbing.com/lef/programs/summer-camp",
-          "availability": "https://schema.org/InStock"
-        }
-      }
-      </script>
-
+      </div>
     </div>
   </section>
 
