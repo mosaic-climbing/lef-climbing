@@ -7,7 +7,7 @@ Plain HTML + one CSS file + one JS file. No framework, no build step, no `packag
 ## Live URLs
 
 - **Production target**: `lefclimbing.com` (still served by Wix during the transition)
-- **Repo**: `lef-climbing/lef-climbing` on GitHub
+- **Repo**: `mosaic-climbing/lef-climbing` on GitHub
 
 ## Stack
 
@@ -26,9 +26,6 @@ classes.html            group events + youth/adult instruction + inquiry form
 membership.html         adult / youth memberships + benefits comparison
 calendar.html           events + link to portal calendar
 contact.html            address, phone, contact form
-careers.html            roles overview
-route-setter.html       route setter job page
-youth-coach.html        youth coach job page
 climb-with-us.html      day passes / memberships / gift cards (links to portal)
 404.html                error page
 waiver.html             redirect to portal waiver
@@ -48,7 +45,7 @@ Then open <http://localhost:8000>. Any static server works.
 
 Netlify auto-deploys on every push to `main`:
 
-1. Connect the repo at <https://app.netlify.com> → "Add new site" → "Import from GitHub" → pick `lef-climbing/lef-climbing`.
+1. Connect the repo at <https://app.netlify.com> → "Add new site" → "Import from GitHub" → pick `mosaic-climbing/lef-climbing`.
 2. Build settings come from `netlify.toml` — publish dir `.`, no build command.
 3. Custom domain: Netlify dashboard → **Domain settings** → **Add custom domain** → `lefclimbing.com`. Update DNS at the registrar to point at Netlify.
 
@@ -76,7 +73,7 @@ Once on Netlify, this becomes optional — Netlify's `Cache-Control` headers (se
 ## SEO + AI discoverability
 
 - Per-page unique `<title>`, `<meta description>`, canonical, OG, Twitter Card
-- JSON-LD on every page: `SportsActivityLocation` (with `paymentAccepted`, `areaServed`, `hasMap`, etc.). Home adds `WebSite` + 3 `Service` blocks. Booking adds `makesOffer`. About adds `FAQPage`. Calendar adds `Event` for the Summer Camp.
+- JSON-LD on every page: `SportsActivityLocation` (with `paymentAccepted`, `areaServed`, `hasMap`, etc.). Home adds `WebSite` + 2 `Service` blocks. About adds `FAQPage`.
 - `llms.txt` at root for LLM crawlers
 - Page-specific OG images (each page's social preview matches its hero photo)
 
@@ -96,7 +93,7 @@ axe-core WCAG 2.1 AA — **zero violations** across all 9 main pages. Includes:
 
 - Don't add a build step or framework.
 - Don't add tracking / analytics scripts without asking.
-- Don't change navigation order (About / Booking / Membership / Calendar / Contact / Climb With Us).
+- Don't change navigation order (About / Classes / Membership / Calendar / Contact / Climb With Us).
 - Don't replace the Instagram embed (LightWidget) without asking — owner controls it.
 
 ## License

@@ -70,7 +70,6 @@ The new site is at `https://lef-climbing.chris-shotwell.workers.dev/` (until DNS
 - [ ] Submit a test on `/contact` — should show a captcha then a thank-you page
 - [ ] Submit a test on `/classes` — same flow
 - [ ] Submit a test via the chat bubble (bottom right) — inline thank-you message
-- [ ] Submit a test on `/route-setter#apply` and `/youth-coach#apply`
 
 For each form submission, you'll get a **FormSubmit confirmation email** at `info@lefclimbing.com` the first time. **Click the activation link** in each — that's a one-time setup so submissions land in the inbox automatically going forward.
 
@@ -201,13 +200,13 @@ Set up Cloudflare's recommended security/performance settings via the GitHub Act
 5. **Continue to summary** → **Create Token** → **copy the token** (you only see it once)
 
 6. Add as GitHub secret:
-   - https://github.com/lef-climbing/lef-climbing/settings/secrets/actions → **New repository secret**
+   - https://github.com/mosaic-climbing/lef-climbing/settings/secrets/actions → **New repository secret**
    - Name: `CLOUDFLARE_API_TOKEN`
    - Value: the token from step 5
    - **Add secret**
 
 **Run the workflow:**
-7. https://github.com/lef-climbing/lef-climbing/actions/workflows/cloudflare-harden.yml
+7. https://github.com/mosaic-climbing/lef-climbing/actions/workflows/cloudflare-harden.yml
 8. Click **Run workflow** → leave defaults → **Run workflow** (green button)
 9. Wait ~30 seconds. Click into the run, expand the "Run hardening script" step. You should see green ✓ for every setting:
    - SSL: full_strict, always-HTTPS, HTTPS rewrites, TLS 1.2+, TLS 1.3, HTTP/3, 0-RTT
@@ -308,7 +307,6 @@ Run through this list 1–2 hours after the cutover, and again after 24 h:
 - [ ] Test contact form → confirmation email appears at `info@lefclimbing.com`
 - [ ] Test booking form → same
 - [ ] Test chat bubble → same
-- [ ] Test route-setter and youth-coach apply forms → same
 
 **Legacy URL redirects:**
 - [ ] `lefclimbing.com/details` → 301 to `/about`
@@ -352,8 +350,8 @@ If the issue is mid-Phase 4 (registrar transfer), it's harder to roll back — W
 
 - Workers preview (always): `https://lef-climbing.chris-shotwell.workers.dev/`
 - Production target: `https://lefclimbing.com/`
-- Repo: `https://github.com/lef-climbing/lef-climbing`
-- GitHub Actions: `https://github.com/lef-climbing/lef-climbing/actions`
+- Repo: `https://github.com/mosaic-climbing/lef-climbing`
+- GitHub Actions: `https://github.com/mosaic-climbing/lef-climbing/actions`
 
 ### Key dashboards
 
@@ -470,7 +468,7 @@ T (transfer completes — you'll get a Dreamhost email):
 **While you wait** (T-7 to T):
 
 - [ ] **Verify MX records imported** in Cloudflare DNS (Phase 1.3 checklist) — last chance to catch a missing one before email matters.
-- [ ] **Add CLOUDFLARE_API_TOKEN to GitHub secrets** so the hardening Action runs the moment Cloudflare goes Active. Permissions: `Zone Settings: Edit + Zone: Read + Account Rulesets: Edit`, scoped to `lefclimbing.com`. Add at https://github.com/lef-climbing/lef-climbing/settings/secrets/actions.
+- [ ] **Add CLOUDFLARE_API_TOKEN to GitHub secrets** so the hardening Action runs the moment Cloudflare goes Active. Permissions: `Zone Settings: Edit + Zone: Read + Account Rulesets: Edit`, scoped to `lefclimbing.com`. Add at https://github.com/mosaic-climbing/lef-climbing/settings/secrets/actions.
 - [ ] **Test every form one more time** at https://lef-climbing.chris-shotwell.workers.dev — and click the FormSubmit confirmation email at `info@lefclimbing.com` so the first real submission post-cutover works without a hiccup.
 - [ ] **Verify the EPP transfer code worked** — Dreamhost should show the transfer "In Progress" with an expected completion date. If Dreamhost shows "Failed" or asks for a fresh code, get one from Wix again.
 - [ ] **Don't lower TTL at Wix** — you can't (Wix has locked DNS) and it doesn't matter; nameserver propagation runs on a different timer than record TTLs.

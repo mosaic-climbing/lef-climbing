@@ -11,10 +11,10 @@ Static marketing site for LEF Climbing (indoor climbing gym, 916 N Broadway, Lex
   - Deploy: push to `main` → Cloudflare Workers Builds auto-deploys (see Deploy section below).
   - Config: [wrangler.jsonc](wrangler.jsonc); security/cache headers in [_headers](_headers); legacy URL 301s in [_redirects](_redirects).
   - Zone hardening: `scripts/harden-cloudflare.sh` applies SSL/HTTP3/Auto Minify/etc. (idempotent; needs `CLOUDFLARE_API_TOKEN`).
-  - Repo: `lef-climbing/lef-climbing` on GitHub. Public.
+  - Repo: `mosaic-climbing/lef-climbing` on GitHub. Public.
 - Local dev: `python3 -m http.server 8000` then open `http://localhost:8000`.
 - **Fonts**: League Spartan (display weight 900) + Inter (body weights 400/500/600/700/800) + JetBrains Mono (numerics 500). **Self-hosted** under `/fonts/` — the `@font-face` rules live inline at the top of `styles.css` (a single combined CSS request). Originally pulled from Google Fonts; switched to self-hosting to eliminate two third-party round-trips.
-- **No JS framework**. `script.js` handles: mobile nav toggle, sticky-header scroll state, `aria-current` on nav, year auto-fill, injected chat widget (POSTs to FormSubmit → `info@lefclimbing.com`), and IntersectionObserver-based lazy loading of the LightWidget Instagram iframe + Flodesk newsletter widget when each nears viewport. Don't add libraries.
+- **No JS framework**. `script.js` handles: mobile nav toggle, sticky-header scroll state, `aria-current` on nav, year auto-fill, injected chat widget (POSTs to FormSubmit → `info@lefclimbing.com`). LightWidget Instagram embed and Flodesk newsletter from Mosaic have been removed; not in use. Don't add libraries.
 
 ## File map
 
@@ -25,9 +25,6 @@ classes.html            group events + youth/adult instruction
 membership.html         adult / youth memberships + benefits
 calendar.html           events
 contact.html            address, phone, contact form
-careers.html            open roles list
-route-setter.html       route setter job (with FormSubmit apply form)
-youth-coach.html        youth coach job (with FormSubmit apply form)
 climb-with-us.html      buy day pass / membership / gift card
 waiver.html             redirect to portal waiver
 404.html                error page
@@ -84,24 +81,21 @@ favicon.ico, favicon-32.png, favicon-192.png, apple-touch-icon.png
 - **`images/` is intentionally a library** — contains photos referenced by the site PLUS extras for future use (per owner request). Don't delete unreferenced ones.
 - Hero photos use `fetchpriority="high" decoding="async"` (no lazy). Below-fold images use `loading="lazy" decoding="async"`.
 - Cinematic image filter (slight desaturate / contrast bump) lives in CSS.
-- The `wilkinson.jpg` is the wide bouldering-room shot (owner-airdropped, used for bouldering rows on home + about). `bouldering-wide.jpg` is the older bouldering shot, kept as backup.
+
 
 ## Forms
 
 - **All forms POST to FormSubmit.co** with `action="https://formsubmit.co/info@lefclimbing.com"`. `info@lefclimbing.com` forwards to the owner anyway, so this is the single inbox.
   - `contact.html` — general inquiries
   - `classes.html` (`#inquire` section) — group event/classes inquiries; every "Inquire" / "Email the owner to book" CTA across the booking page is an anchor link to this one form
-  - `route-setter.html` (`#apply`) — full apply form (name, email, phone, portfolio URL, essay)
-  - `youth-coach.html` (`#apply`) — full apply form (name, email, phone, résumé URL, essay)
   - Chat-bubble widget (injected on every page) — AJAX POST to `formsubmit.co/ajax/info@...`
   - Hidden `_subject` per form distinguishes contact / booking / apply / chat in the owner's inbox
   - First submission to each `_subject` triggers a one-time FormSubmit activation email — see [MIGRATION.md](MIGRATION.md).
-- The footer mailing-list signup uses **Flodesk** (form ID `6a03e08e8ccae7375c1b4c77`, slim "Inline" form designed for footer embedding). Inline-embedded in the footer of every page via `assets.flodesk.com/universal.js`, lazy-loaded by `script.js` when the footer nears viewport. Subscribers land in the owner's newsletter dashboard. Brand styling lives in Flodesk's editor, not in `styles.css`. The older full-page form at `lefclimbing.myflodesk.com/mailinglist` still exists as a standalone signup page — referenced by the footer's `<noscript>` fallback link.
 
 ## SEO + AI discoverability
 
 - Per-page unique `<title>` (≤60 chars), `<meta description>` (140–160 chars), canonical, OG + Twitter.
-- JSON-LD: `SportsActivityLocation` (with `paymentAccepted`, `currenciesAccepted`, `areaServed` for 8 surrounding cities, `hasMap`, `email`, `logo`, `foundingDate`) on every page. Home adds `WebSite` + 3 `Service` blocks (bouldering / ropes / fitness). Booking adds `makesOffer`. About adds `FAQPage`. Calendar adds `Event` for the Summer Camp.
+- JSON-LD: `SportsActivityLocation` (with `paymentAccepted`, `currenciesAccepted`, `areaServed` for 8 surrounding cities, `hasMap`, `email`, `logo`, `foundingDate`) on every page. Home adds `WebSite` + 2 `Service` blocks (bouldering / ropes). About adds `FAQPage` (TODO: needs LEF-specific FAQ).
 - `llms.txt` at root.
 - `sitemap.xml` and `robots.txt` at root.
 - Page-specific OG images — each page's share preview matches its hero photo.
@@ -135,7 +129,7 @@ Required regardless of host: `_headers` sets `Cache-Control: immutable, max-age=
 
 ## Deploy
 
-**Push to `main` on GitHub → Cloudflare auto-deploys.** The `lef-climbing` Worker on Cloudflare is connected to the `lef-climbing/lef-climbing` GitHub repo via **Cloudflare Workers Builds**. Every push to `main` kicks off a build that uploads the static assets in `.` (per [wrangler.jsonc](wrangler.jsonc)) to the Worker. `_headers` and `_redirects` are honored by Workers Assets.
+**Push to `main` on GitHub → Cloudflare auto-deploys.** The `lef-climbing` Worker on Cloudflare is connected to the `mosaic-climbing/lef-climbing` GitHub repo via **Cloudflare Workers Builds**. Every push to `main` kicks off a build that uploads the static assets in `.` (per [wrangler.jsonc](wrangler.jsonc)) to the Worker. `_headers` and `_redirects` are honored by Workers Assets.
 
 ```bash
 git add ... && git commit -m "..." && git push origin main
@@ -168,7 +162,7 @@ Zone-level Cloudflare settings (SSL/TLS Full Strict, HTTP/3, Auto Minify HTML/CS
 
 - Don't add a build step or framework.
 - Don't add tracking / analytics scripts without asking.
-- Don't change the navigation order (About / Booking / Membership / Calendar / Contact / Climb With Us).
+- Don't change the navigation order (About / Classes / Membership / Calendar / Contact / Climb With Us).
 - Don't replace the chat widget injection in `script.js` — the owner asked for that bottom-right contact bubble.
 - Don't add an email-collection modal — owner doesn't want intrusive popups.
 - Don't delete unreferenced photos in `images/` — owner keeps them as a library for future use.
