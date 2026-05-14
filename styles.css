@@ -477,11 +477,12 @@ table { border-collapse: collapse; }
   --grey-500:    #8f8f8f;
   --line:        #e6e6e3;
   --line-strong: #cfcfcb;
-  /* Accent — deep teal echoing LEF's bouldering wall. Variable name
-     kept as `--clay` so the existing CSS scaffold's 30+ references
+  /* Accent — LEF brand blue, pulled directly from the RPHQ portal's
+     branding config (primaryColor #70addb, deeper #3189af). Variable
+     name kept as `--clay` so the existing CSS scaffold's 30+ references
      continue to work; the value is what defines the brand. */
-  --clay:        #1e5d57;        /* deep teal accent */
-  --clay-deep:   #143f3b;        /* darker for hover */
+  --clay:        #3189af;        /* LEF blue */
+  --clay-deep:   #246a8a;        /* darker for hover */
 
   /* Type — Inter only. Variable axes (weight + width when available). */
   --sans:  'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
