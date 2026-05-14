@@ -13,8 +13,8 @@ Plain HTML + one CSS file + one JS file. No framework, no build step, no `packag
 
 - HTML/CSS/JS, no build tool
 - **Hosting**: Cloudflare Workers Assets — auto-deploys from `main` via Cloudflare Workers Builds. Active URL: `https://lef-climbing.chris-shotwell.workers.dev/` (target custom domain: `lefclimbing.com`)
-- **Forms**: Netlify Forms — `contact.html` and `classes.html` are wired with `data-netlify` + honeypot
-- **Fonts**: League Spartan (display) + Inter (body) + JetBrains Mono (numerics) from Google Fonts
+- **Forms**: [FormSubmit](https://formsubmit.co) — `contact.html` and `classes.html` POST to `info@lefclimbing.com` with a honeypot field
+- **Fonts**: League Spartan (display) + Inter (body) + JetBrains Mono (numerics). Self-hosted under `/fonts/` (WOFF2 subsets, originally from Google Fonts)
 - **No JS framework**. `script.js` handles mobile-nav toggle, sticky-header scroll state, `aria-current` on nav, year auto-fill, and an injected chat bubble
 
 ## Pages
