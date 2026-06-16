@@ -1074,7 +1074,7 @@ hr.rule-strong { border: 0; border-top: 1.5px solid var(--ink); margin-block: va
 
 /* ---------- Footer ---------- */
 .site-foot {
-  background: var(--ink);
+  background: #000;
   color: var(--bone);
   padding-block: clamp(4rem, 4rem + 4vw, 6rem) var(--s-7);
 }
@@ -1558,7 +1558,7 @@ a:hover { color: var(--clay); }
 
 /* Header — solid charcoal bar */
 .site-head {
-  background: #1a1a1a;
+  background: #000;
   border-bottom: 0;
   color: #fff;
 }
