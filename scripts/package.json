@@ -1,0 +1,11 @@
+{
+  "name": "lef-calendar-scraper",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Generates the LEF calendar plan allowlist from the Redpoint HQ storefront GraphQL.",
+  "scripts": {
+    "discover": "node discover-plan-ids.mjs",
+    "dev": "node dev-server.mjs"
+  }
+}

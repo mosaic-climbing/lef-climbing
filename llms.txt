@@ -14,20 +14,21 @@
 
 - [Bouldering](https://www.lefclimbing.com/about#bouldering): Indoor bouldering walls with padded floors. No ropes, no harnesses, no partner required.
 - [Top-rope, auto-belay & lead](https://www.lefclimbing.com/about#ropes): Roped climbing on tall walls. Top-rope needs a belay partner; auto-belays don't. Lead climbing for advanced climbers.
+- [Yoga](https://www.lefclimbing.com/about): A regular yoga schedule for stretching, mobility, and recovery.
 
 ## Programs & instruction
 
-- [Classes](https://www.lefclimbing.com/classes): Instruction and class schedule. Full list at https://portal.lefclimbing.com/lef/n/classes.
+- [Booking](https://www.lefclimbing.com/booking): Classes, youth clubs, private instruction, and group events (birthday parties, scouts, corporate, workshops). Class list at https://portal.lefclimbing.com/lef/n/classes.
 - [Memberships](https://www.lefclimbing.com/membership): Memberships with full facility access. Buy at https://portal.lefclimbing.com/lef/n/memberships.
 - [Day pass / climb with us](https://www.lefclimbing.com/climb-with-us): Reserve a day pass at https://portal.lefclimbing.com/lef/programs/day-pass-lef.
-- [Events calendar](https://www.lefclimbing.com/calendar): Hours, holiday closures, and upcoming events.
+- [Events calendar](https://www.lefclimbing.com/calendar): Live week-view of classes, youth clubs, member events, yoga, Boulder League, and summer camps. Register through the portal.
 - [Waiver](https://portal.lefclimbing.com/lef/agreements/lef-waiver): Sign before climbing.
 
 ## Site
 
 - Home: https://www.lefclimbing.com/
 - About: https://www.lefclimbing.com/about
-- Classes: https://www.lefclimbing.com/classes
+- Booking: https://www.lefclimbing.com/booking
 - Membership: https://www.lefclimbing.com/membership
 - Calendar: https://www.lefclimbing.com/calendar
 - Contact: https://www.lefclimbing.com/contact
