@@ -1,101 +1,79 @@
 # LEF Climbing — static marketing site
 
-The website for [LEF Climbing](https://www.lefclimbing.com), an indoor climbing gym in Lexington, Kentucky (greater Lexington). Replaces the existing Wix site.
+The website for [LEF Climbing](https://www.lefclimbing.com), the indoor climbing gym in Lexington, Kentucky. Replaces the existing Wix site.
 
-Plain HTML + one CSS file + one JS file. No framework, no build step, no `package.json`.
+Plain HTML + one CSS file + two JS files (`script.js` everywhere, `calendar.js` on `/calendar`). No frontend framework and no build step for the pages. A small Cloudflare Worker (`src/worker.js`) serves `/api/events` for the live events calendar. See [CLAUDE.md](CLAUDE.md) for the full handoff.
 
 ## Live URLs
 
 - **Production target**: `lefclimbing.com` (still served by Wix during the transition)
+- **Active deploy**: `https://lef-climbing.chris-shotwell.workers.dev/`
 - **Repo**: `mosaic-climbing/lef-climbing` on GitHub
 
 ## Stack
 
-- HTML/CSS/JS, no build tool
-- **Hosting**: Cloudflare Workers Assets — auto-deploys from `main` via Cloudflare Workers Builds. Active URL: `https://lef-climbing.chris-shotwell.workers.dev/` (target custom domain: `lefclimbing.com`)
-- **Forms**: [FormSubmit](https://formsubmit.co) — `contact.html` and `classes.html` POST to `info@lefclimbing.com` with a honeypot field
-- **Fonts**: League Spartan (display) + Inter (body) + JetBrains Mono (numerics). Self-hosted under `/fonts/` (WOFF2 subsets, originally from Google Fonts)
-- **No JS framework**. `script.js` handles mobile-nav toggle, sticky-header scroll state, `aria-current` on nav, year auto-fill, and an injected chat bubble
+- HTML/CSS/JS, no page build tool. The `src/` Worker is bundled by Cloudflare Workers Builds on push.
+- **Hosting**: Cloudflare Workers Assets + Worker entry — auto-deploys from `main` via Cloudflare Workers Builds.
+- **Forms**: [FormSubmit](https://formsubmit.co) — `contact.html` and `booking.html` POST to `info@lefclimbing.com` with a honeypot field.
+- **Calendar**: `/calendar` renders a live week view from `/api/events`, a Worker route proxying LEF's Redpoint HQ storefront GraphQL. The shown-event allowlist is regenerated daily by a GitHub Action (`.github/workflows/calendar-allowlist.yml`). Calendar tooling is **zero-dependency** (Node built-ins; nothing to `npm install`).
+- **Fonts**: League Spartan (display) + Inter (body) + JetBrains Mono (numerics). Self-hosted under `/fonts/` (WOFF2 subsets).
+- **No JS framework**. `script.js` handles mobile-nav toggle, sticky-header scroll state, `aria-current` on nav, year auto-fill, and an injected chat bubble.
 
 ## Pages
 
 ```
-index.html              home — hero, disciplines, visit, programs intro
-about.html              about / disciplines (bouldering, ropes, fitness) / FAQ
-classes.html            group events + youth/adult instruction + inquiry form
-membership.html         adult / youth memberships + benefits comparison
-calendar.html           events + link to portal calendar
+index.html              home — hero, get-climbing CTAs, disciplines, programs, visit
+about.html              about / disciplines (bouldering, ropes) / yoga / classes / FAQ
+booking.html            group events + youth/adult instruction + private rates (was classes.html)
+membership.html         adult / youth memberships
+calendar.html           live events calendar (week grid / mobile agenda) + portal links
 contact.html            address, phone, contact form
-climb-with-us.html      day passes / memberships / gift cards (links to portal)
+climb-with-us.html      day passes / memberships / gift cards / summer camp (links to portal)
 404.html                error page
 waiver.html             redirect to portal waiver
 ```
 
-Plus `sitemap.xml`, `robots.txt`, `llms.txt`, `wrangler.jsonc`, `_headers`, `_redirects`, favicons.
+Internal links use **clean URLs** (no `.html`). Plus `src/` (Worker), `scripts/` (calendar tooling), `sitemap.xml`, `robots.txt`, `llms.txt`, `wrangler.jsonc`, `_headers`, `_redirects`, `.assetsignore`, favicons.
 
 ## Local dev
 
 ```bash
+# Static pages (calendar shows its error state — /api/events isn't served):
 python3 -m http.server 8000
-```
 
-Then open <http://localhost:8000>. Any static server works.
+# Full site incl. the live calendar, no npm:
+node scripts/dev-server.mjs        # http://localhost:8000
+```
 
 ## Deploy
 
-Cloudflare Workers Builds auto-deploys on every push to `main`:
-
-1. The `lef-climbing` Worker on Cloudflare is connected to `mosaic-climbing/lef-climbing` on GitHub. Each push to `main` kicks off a build that uploads the static assets in `.` (per `wrangler.jsonc`) to the Worker. `_headers` and `_redirects` are honored by Workers Assets.
-2. Check builds at <https://dash.cloudflare.com> → Workers & Pages → `lef-climbing` → **Deployments**.
-3. Custom domain: Cloudflare dashboard → Worker → **Settings** → **Domains & Routes** → add `lefclimbing.com`. Cutover playbook lives in [MIGRATION.md](MIGRATION.md).
-
-Don't run `wrangler deploy` locally — it bypasses Git history and the build pipeline. Pushing to `main` is the supported path.
-
-## Workflow
-
-This site is maintained collaboratively with Claude. The flow:
-
-1. Owner messages Claude what to change.
-2. Claude edits files, commits to `main`, pushes.
-3. Cloudflare Workers Builds auto-deploys in ~30 seconds.
-4. Rollback = redeploy a previous build from the Cloudflare dashboard.
+Cloudflare Workers Builds auto-deploys on every push to `main` (uploads static assets + bundles `src/worker.js`; `_headers` and `_redirects` honored). Check builds at <https://dash.cloudflare.com> → Workers & Pages → `lef-climbing` → **Deployments**. Don't run `wrangler deploy` locally. Cutover playbook: [MIGRATION.md](MIGRATION.md).
 
 ## Cache busting
 
-`styles.css` is referenced as `styles.css?v=N` from every page. Bump `N` across all HTML files when the CSS changes:
+`styles.css?v=N`, `script.js?v=M`, `calendar.js?v=K` on every page. Bump across all HTML when a file changes:
 
 ```bash
-for f in *.html; do sed -i '' 's/styles\.css?v=29/styles.css?v=1/g' "$f"; done
+for f in *.html; do sed -i '' 's/styles\.css?v=3/styles.css?v=4/g' "$f"; done
 ```
 
-Required regardless of host: `_headers` sets `Cache-Control: immutable, max-age=31536000` on `/styles.css` and `/script.js`, so browsers won't refetch without the `?v=N` change.
+`_headers` long-caches `/styles.css`, `/script.js`, `/calendar.js`, `/images/*`, `/fonts/*`, so browsers won't refetch without the `?v=N` change.
 
-## SEO + AI discoverability
+## SEO + accessibility
 
-- Per-page unique `<title>`, `<meta description>`, canonical, OG, Twitter Card
-- JSON-LD on every page: `SportsActivityLocation` (with `paymentAccepted`, `areaServed`, `hasMap`, etc.). Home adds `WebSite` + 2 `Service` blocks. About adds `FAQPage`.
-- `llms.txt` at root for LLM crawlers
-- Page-specific OG images (each page's social preview matches its hero photo)
-
-## Accessibility
-
-axe-core WCAG 2.1 AA — **zero violations** across all 9 main pages. Includes:
-
-- Semantic landmarks
-- Skip-to-content link
-- Visible focus rings
-- Logical heading order (one `<h1>` per page)
-- All form inputs labelled
-- `aria-current="page"` on active nav link
-- `prefers-reduced-motion` honored
+- Per-page `<title>`, `<meta description>`, canonical, OG, Twitter Card.
+- JSON-LD on every page: `SportsActivityLocation`. Home adds `WebSite` + 3 `Service` blocks (bouldering / ropes / yoga). About adds `FAQPage` (mirrored by a visible FAQ).
+- Scoped Content-Security-Policy in `_headers`.
+- axe-core WCAG 2.1 AA target: zero violations. One `<h1>` per page, skip link, labelled inputs, `aria-current` on the active nav link.
 
 ## Don't
 
-- Don't add a build step or framework.
-- Don't add tracking / analytics scripts without asking.
-- Don't change navigation order (About / Classes / Membership / Calendar / Contact / Climb With Us).
-- Don't replace the Instagram embed (LightWidget) without asking — owner controls it.
+- Don't add a page build step or frontend framework, or npm runtime deps to the calendar tooling.
+- Don't add tracking / analytics without asking.
+- Don't change navigation order (About / Booking / Membership / Calendar / Contact / Climb With Us).
+- Don't add `.html` to internal links — use clean URLs.
+- Don't hand-edit `src/portal-visible-plan-ids.js` — it's regenerated by the daily Action.
 
 ## License
 
-All site copy and photos belong to LEF Climbing. Fonts loaded from Google Fonts under their open licenses.
+All site copy and photos belong to LEF Climbing.

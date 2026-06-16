@@ -25,7 +25,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="preload" as="image" href="/images/bouldering-action.avif" type="image/avif" fetchpriority="high" />
-<link rel="stylesheet" href="styles.css?v=2" />
+<link rel="stylesheet" href="styles.css?v=4" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -77,6 +77,14 @@
       "provider": {"@id": "https://www.lefclimbing.com/#business"},
       "description": "Top-rope and auto-belay climbing on tall walls. Top-rope needs a belay partner; auto-belays don't. Lead climbing for advanced climbers.",
       "url": "https://www.lefclimbing.com/about#ropes"
+    },
+    {
+      "@type": "Service",
+      "name": "Yoga",
+      "serviceType": "Yoga classes",
+      "provider": {"@id": "https://www.lefclimbing.com/#business"},
+      "description": "A regular yoga schedule for stretching, mobility, and recovery. Open to members and guests; sign up through the portal.",
+      "url": "https://www.lefclimbing.com/about"
     }
   ]
 }
@@ -87,19 +95,19 @@
 
 <header class="site-head">
   <div class="wrap nav">
-    <a href="index.html" class="brand" aria-label="LEF Climbing — Home"><img src="/favicon-192.png" alt="LEF Climbing" width="192" height="192" /></a>
+    <a href="/" class="brand" aria-label="LEF Climbing — Home"><img src="/favicon-192.png" alt="LEF Climbing" width="192" height="192" /></a>
     <button class="nav-toggle" type="button" aria-controls="nav-menu" aria-expanded="false" aria-label="Open menu" data-nav-toggle>
       <svg class="o" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg>
       <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
     </button>
     <nav id="nav-menu" class="nav-menu" aria-label="Primary" data-nav-menu>
       <ul class="nav-list">
-        <li><a href="about.html">About</a></li>
-        <li><a href="classes.html">Classes</a></li>
-        <li><a href="membership.html">Membership</a></li>
-        <li><a href="calendar.html">Calendar</a></li>
-        <li><a href="contact.html">Contact</a></li>
-        <li><a href="climb-with-us.html" class="btn btn-primary nav-cta">Climb With Us</a></li>
+        <li><a href="about">About</a></li>
+        <li><a href="booking">Booking</a></li>
+        <li><a href="membership">Membership</a></li>
+        <li><a href="calendar">Calendar</a></li>
+        <li><a href="contact">Contact</a></li>
+        <li><a href="climb-with-us" class="btn btn-primary nav-cta">Climb With Us</a></li>
       </ul>
     </nav>
   </div>
@@ -114,6 +122,13 @@
       <span class="eyebrow">Lexington, Kentucky</span>
       <h1>Kentucky's<br/>Premier Indoor<br/>Climbing Center</h1>
     </div>
+    <a class="hero-promo" href="booking#youth">
+      <span class="hero-promo__img"><picture><source srcset="images/youth-group.avif" type="image/avif" /><source srcset="images/youth-group.webp" type="image/webp" /><img src="images/youth-group.jpg" alt="" width="1200" height="1800" loading="lazy" decoding="async" /></picture></span>
+      <span class="hero-promo__body">
+        <span class="hero-promo__lede">Check out our<br/>youth clubs &amp; classes</span>
+        <span class="hero-promo__cta">Explore <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span>
+      </span>
+    </a>
   </section>
 
   <!-- GET CLIMBING — the four primary CTAs from the current Wix site -->
@@ -146,7 +161,7 @@
           <div class="alt-row__body">
             <h3>Bouldering</h3>
             <p>A unique style of climbing done over a padded floor without ropes or harnesses. You can boulder with or without a partner.</p>
-            <a href="about.html#bouldering" class="btn-sm-dark">Learn about bouldering</a>
+            <a href="about#bouldering" class="btn-sm-dark">Learn about bouldering</a>
           </div>
         </article>
 
@@ -155,10 +170,35 @@
           <div class="alt-row__body">
             <h3>Top-rope, auto-belay &amp; lead</h3>
             <p>Top-rope and auto-belay climbing are done with a rope suspended overhead — top-roping needs a partner to belay, auto-belays don't. Lead climbing is advanced and starts with the rope at the bottom, clipping to progressive protection points as you ascend.</p>
-            <a href="about.html#ropes" class="btn-sm-dark">Learn about ropes</a>
+            <a href="about#ropes" class="btn-sm-dark">Learn about ropes</a>
           </div>
         </article>
 
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRAMS / GROUPS -->
+  <section class="section section-bone-deep">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Built for<br/>your group.</h2>
+        <p class="lede">We coach kids in weekly clubs, host birthday parties and team building, and offer private instruction for groups of one to four. Tell us what you're trying to do — we'll build it.</p>
+        <div class="actions mt-6">
+          <a href="booking" class="tlink">See programs &amp; pricing</a>
+        </div>
+      </div>
+      <div class="cols cols-2-equal mt-8" style="gap: var(--s-5);">
+        <div class="media">
+          <span class="eyebrow">Youth</span>
+          <p class="mt-2">Green, Blue, and Purple Clubs plus our Advanced Team — weekly lessons that build movement, confidence, and skill for ages 5 to 16.</p>
+          <a href="booking#youth" class="btn-sm-dark mt-3">Youth programs</a>
+        </div>
+        <div class="media">
+          <span class="eyebrow">Groups</span>
+          <p class="mt-2">Birthday parties, scout outings, corporate team building, and custom group events. We'll build a plan and a rate to fit your group.</p>
+          <a href="booking#groups" class="btn-sm-dark mt-3">Group events</a>
+        </div>
       </div>
     </div>
   </section>
@@ -222,12 +262,12 @@
       <div>
         <p class="foot-heading">Site</p>
         <ul class="foot-list">
-          <li><a href="about.html">About</a></li>
-          <li><a href="classes.html">Classes</a></li>
-          <li><a href="membership.html">Membership</a></li>
-          <li><a href="calendar.html">Calendar</a></li>
-          <li><a href="climb-with-us.html">Climb With Us</a></li>
-          <li><a href="contact.html">Contact</a></li>
+          <li><a href="about">About</a></li>
+          <li><a href="booking">Booking</a></li>
+          <li><a href="membership">Membership</a></li>
+          <li><a href="calendar">Calendar</a></li>
+          <li><a href="climb-with-us">Climb With Us</a></li>
+          <li><a href="contact">Contact</a></li>
           <li><a href="https://portal.lefclimbing.com/lef/agreements/lef-waiver" rel="noopener">Waiver</a></li>
         </ul>
       </div>
@@ -239,6 +279,6 @@
   </div>
 </footer>
 
-<script src="script.js?v=1" defer></script>
+<script src="script.js?v=2" defer></script>
 </body>
 </html>

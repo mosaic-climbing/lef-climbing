@@ -1,44 +1,61 @@
 # LEF Climbing — site handoff
 
-Static marketing site for LEF Climbing (indoor climbing gym, 916 N Broadway, Lexington, KY 40505 — phone 859-523-0518, opened TBD (confirm with owner)). Replaces the existing Wix site at https://www.lefclimbing.com. Owner is the owner; primary maintainer is Chris. Site contact email is `info@lefclimbing.com` (also where all form submissions are delivered).
+Static marketing site for LEF Climbing (indoor climbing gym, 916 N Broadway, Lexington, KY 40505 — phone 859-523-0518, opened TBD (confirm with owner)). Replaces the existing Wix site at https://www.lefclimbing.com. Owner is the owner; primary maintainer is Chris. Site contact email is `info@lefclimbing.com` (also where all form submissions are delivered). LEF is the only climbing gym in Lexington.
 
 ## Stack
 
-- Plain HTML + one CSS file + one JS file. No framework, no build step, no `package.json`.
-- **Hosting**: Cloudflare Workers Assets. See [MIGRATION.md](MIGRATION.md) for the Wix → Cloudflare cutover.
+- Plain HTML + one CSS file + two JS files (`script.js` on every page, `calendar.js` only on `/calendar`). **No frontend framework and no build step for the pages.** There IS a small Cloudflare Worker entry (`src/worker.js`) that serves `/api/events` for the live events calendar — Workers Builds bundles it on push. See the **Events calendar** section below.
+- A dev-only `scripts/package.json` exists but declares **zero runtime dependencies** — the calendar tooling (`scripts/discover-plan-ids.mjs`, `scripts/dev-server.mjs`) uses Node built-ins only (`fetch`, `http`, `fs`). Nothing to `npm install`; CI runs no `npm install`. Keep it that way.
+- **Hosting**: Cloudflare Workers Assets (static) **+ Worker entry (`src/worker.js`)** for `/api/events`. See [MIGRATION.md](MIGRATION.md) for the Wix → Cloudflare cutover.
   - Active deploy URL: `https://lef-climbing.chris-shotwell.workers.dev/`
   - Target custom domain: `lefclimbing.com` (cutover from Wix per MIGRATION.md)
   - Deploy: push to `main` → Cloudflare Workers Builds auto-deploys (see Deploy section below).
-  - Config: [wrangler.jsonc](wrangler.jsonc); security/cache headers in [_headers](_headers); legacy URL 301s in [_redirects](_redirects).
+  - Config: [wrangler.jsonc](wrangler.jsonc) (`main: "src/worker.js"`, `assets.binding: "ASSETS"`, a ratelimit `unsafe.binding`); security/cache headers + CSP in [_headers](_headers); legacy URL 301s in [_redirects](_redirects); [.assetsignore](.assetsignore) keeps server-only paths (`src/`, `scripts/`, `.github/`, `wrangler.jsonc`, docs) out of the public asset bundle.
   - Zone hardening: `scripts/harden-cloudflare.sh` applies SSL/HTTP3/Auto Minify/etc. (idempotent; needs `CLOUDFLARE_API_TOKEN`).
   - Repo: `mosaic-climbing/lef-climbing` on GitHub. Public.
-- Local dev: `python3 -m http.server 8000` then open `http://localhost:8000`.
-- **Fonts**: League Spartan (display weight 900) + Inter (body weights 400/500/600/700/800) + JetBrains Mono (numerics 500). **Self-hosted** under `/fonts/` — the `@font-face` rules live inline at the top of `styles.css` (a single combined CSS request). Originally pulled from Google Fonts; switched to self-hosting to eliminate two third-party round-trips.
-- **No JS framework**. `script.js` handles: mobile nav toggle, sticky-header scroll state, `aria-current` on nav, year auto-fill, injected chat widget (POSTs to FormSubmit → `info@lefclimbing.com`). LightWidget Instagram embed and Flodesk newsletter from Mosaic have been removed; not in use. Don't add libraries.
+- Local dev: `python3 -m http.server 8000` for the static pages — but `/api/events` won't work under it, so the calendar shows its error state. To preview the **live calendar locally with no npm**, run `node scripts/dev-server.mjs` (serves the site + `/api/events` on `http://localhost:8000`). `npx wrangler dev` also works but pulls wrangler via npm.
+- **Fonts**: League Spartan (display weight 900) + Inter (body weights 400/500/600/700/800) + JetBrains Mono (numerics 500). **Self-hosted** under `/fonts/` — the `@font-face` rules live inline at the top of `styles.css`. Originally pulled from Google Fonts; switched to self-hosting to eliminate two third-party round-trips.
+- **No JS framework**. `script.js` handles: mobile nav toggle, sticky-header scroll state, `aria-current` on nav (clean-URL aware), year auto-fill, injected chat widget (POSTs to FormSubmit → `info@lefclimbing.com`). `calendar.js` renders the events week-view (only loaded on `/calendar`). LightWidget Instagram embed and Flodesk newsletter from Mosaic were removed; not in use. Don't add libraries.
 
 ## File map
 
 ```
-index.html              home
-about.html              about / disciplines / FAQ
-classes.html            group events + youth/adult instruction
-membership.html         adult / youth memberships + benefits
-calendar.html           events
+index.html              home (hero, get-climbing CTAs, disciplines, programs, visit)
+about.html              about / disciplines / Yoga / classes cards / FAQ
+booking.html            group events + youth/adult instruction + private rates
+                        (renamed from classes.html; /classes 301s here)
+membership.html         adult / youth memberships
+calendar.html           live events calendar (week view; consumes /api/events)
 contact.html            address, phone, contact form
-climb-with-us.html      buy day pass / membership / gift card
+climb-with-us.html      buy day pass / membership / gift card / summer camp / waiver
 waiver.html             redirect to portal waiver
 404.html                error page
-styles.css              @font-face rules + entire design system (~54 KB).
-                        One file on purpose. ?v=N cache-buster on every <link>; bump N when CSS edits land.
+styles.css              @font-face rules + entire design system + calendar styles.
+                        One file on purpose. ?v=N cache-buster on every <link>; bump N on edits.
 script.js               minimal interactive behaviors (see Stack section above)
+calendar.js             events week-view UI (only loaded on calendar.html)
 fonts/                  self-hosted WOFF2 subsets for Inter / League Spartan / JetBrains Mono
-images/                 photo library (referenced + extras — owner keeps unused ones for future use)
+images/                 photo library (referenced + extras — owner keeps unused ones)
+src/                    Worker source (bundled by Workers Builds on push)
+  worker.js               entry: routes /api/events, delegates rest to ASSETS
+  events-api.js           GET /api/events — rate limit, 5-min edge cache, error handling
+  scrape.js               StorefrontPlansQuery + windowed StorefrontCalendarQuery (parallel)
+  normalize.js            rphq row → events.json row; deep-link URLs via planId→slug map
+  calendar-config.js      vendor knobs: GRAPHQL_URL, facilityId, denylist, category rules
+  portal-visible-plan-ids.js   AUTO-GENERATED allowlist of plan IDs (don't hand-edit)
+scripts/
+  discover-plan-ids.mjs   regenerates the allowlist from GraphQL (no Playwright) — see calendar
+  dev-server.mjs          npm-free local server (static + /api/events) for local calendar testing
+  harden-cloudflare.sh    one-shot zone hardening (SSL/HTTP3/etc.) — see Deploy
+  package.json            dev-only, ZERO dependencies
 sitemap.xml, robots.txt, llms.txt    SEO + AI discoverability
-wrangler.jsonc          Cloudflare Workers config (publishes the static site)
-_headers                Cloudflare/Netlify-format security headers + Cache-Control rules
-_redirects              Wix-legacy URL paths → new clean URLs (301)
-scripts/harden-cloudflare.sh    one-shot zone hardening (SSL/HTTP3/etc.) — see Deploy section
-.github/workflows/cloudflare-harden.yml    manual-trigger GitHub Action wrapping the above
+wrangler.jsonc          CF Workers config (assets binding + Worker entry + ratelimit)
+_headers                security headers + CSP + Cache-Control rules
+_redirects              Wix-legacy + /classes→/booking 301s
+.assetsignore           keeps server-only files out of the static bundle
+.github/workflows/calendar-allowlist.yml   daily Action: regenerate the calendar allowlist, PR on drift
+.github/workflows/cloudflare-harden.yml    manual-trigger zone hardening
+.github/dependabot.yml  weekly GitHub-Actions version bumps (keeps the SHA-pinned PR action current)
 MIGRATION.md            Wix → Cloudflare DNS + registrar cutover playbook
 favicon.ico, favicon-32.png, favicon-192.png, apple-touch-icon.png
 ```
@@ -49,14 +66,14 @@ favicon.ico, favicon-32.png, favicon-192.png, apple-touch-icon.png
 
 - **Surface**: `--bone` `#fafafa`, `--bone-deep` `#ededec` (neutral, no warm tints — owner explicitly rejected those).
 - **Ink**: `--ink` `#0a0a0a` (charcoal, not pure black).
-- **Accent**: `--clay` `#1e5d57` (teal — the actual lefclimbing.com brand color). `--clay-deep` `#143f3b` for hover. Do not swap to coral / orange / terracotta — owner rejected those repeatedly.
+- **Accent**: `--clay` `#1e5d57` (teal — the actual lefclimbing.com brand color). `--clay-deep` `#143f3b` for hover. Do not swap to coral / orange / terracotta — owner rejected those repeatedly. Calendar chips inherit these tokens (no hardcoded colors).
 - **Display font**: `--display: 'League Spartan', 'Anton', 'Oswald', 'Inter', system-ui, sans-serif`. Heavy geometric sans.
 
 ### Typography rules
 
 - **One headline style**: `h1`, `h2`, `h3` all use League Spartan, all caps, weight 900, letter-spacing -0.01em. Sizes scale via `clamp()`. `h4` uses Inter for footer column labels.
 - **No italics anywhere.** Owner asked for them stripped sitewide.
-- **Eyebrow style**: `.eyebrow` / `.kicker` / `.marker` are aliases — small uppercase tracked sans, mid-grey. Used sparingly.
+- **Eyebrow style**: `.eyebrow` / `.kicker` / `.marker` are aliases — small uppercase tracked sans, mid-grey. Used sparingly (inside cards/media, never above a section h2).
 - **No eyebrows above section h2 titles** — owner called them weird and unnecessary.
 - Body: `<p>` and `<p class="lede">` (intro / pull paragraph, max-width 72ch). That's it.
 
@@ -64,82 +81,93 @@ favicon.ico, favicon-32.png, favicon-192.png, apple-touch-icon.png
 
 - **`.photo-hero`** — full-bleed photo with overlay text. Used on home (full mega height) and `.photo-hero--page` variant for subpages (~60vh).
 - **`.section`** — vertical section. Variants: `.section-bone-deep` (light grey), `.section-ink` (charcoal with film-grain), `.section-tight` (less padding).
-- **`.alt-rows` / `.alt-row`** — full-width alternating photo/text rows. Workhorse for any list of offerings.
+- **`.alt-rows` / `.alt-row`** — full-width alternating photo/text rows. **Text-only alt-rows (no `.alt-row__media`) auto-collapse to a single full-width column** via a scoped `:has()` rule — that's how the booking package families render without photos. Add a `.alt-row__media` to get the 2-column photo/text layout.
 - **`.cols`** with `.cols-2-equal` / `.cols-narrow-wide` / `.cols-5-7` for two-column layouts. Stacks under 800px.
-- **Buttons**: `.btn .btn-primary` (slate filled), `.btn-ghost` (outlined on light bg, used as secondary CTA), `.btn-sm-dark` (small dark slate, used in alt-rows), `.btn-on-dark` (filled bone on dark sections), `.btn-on-dark-ghost` (outlined on dark sections). Modifiers `.btn-lg`, `.btn-arrow`.
-
-### Hero (home page)
-
-- The `.photo-hero` is `display: grid` with `grid-template-columns: 1fr` and `grid-template-rows: 1fr auto`.
-- Both `.photo-hero__wrap` and `.hero-promo` are pinned with `grid-column: 1 / -1` so the hero promo card overlays the H1's row at `justify-self: end` instead of squeezing the H1 into a sub-column. This was a real bug we fixed.
-- The `.photo-hero__wrap` overrides `.wrap`'s `max-width` and `margin-inline` so the hero text sits closer to the viewport's left edge on wide viewports.
-- The home H1 is hardcoded as 3 lines: `Adventure / Is For / Everyone` — keeps the climber's face visible in the photo.
+- **`.compare`** pricing tables, **`.num-list`** / **`.check-list`** / **`.card`** / **`.tlink`** / **`.media`** — all present in `styles.css`.
+- **`.faq`** — `<details class="faq"><summary>…</summary><div class="answer">…</div></details>` disclosure blocks (About FAQ).
+- **`.cal-*`** — the calendar week-grid / agenda / modal component (see Events calendar).
+- **Buttons**: `.btn .btn-primary` (teal filled), `.btn-ghost` (outlined on light bg), `.btn-sm-dark` (small dark, used in alt-rows), `.btn-on-dark` / `.btn-on-dark-ghost` (on dark sections), `.btn-sm`. Modifiers `.btn-lg`, `.btn-arrow`.
 
 ### Photos
 
-- All real images from the live lefclimbing.com site (scraped at high-res via `static.wixstatic.com/media/...` originals, optimized to 1800px max @ JPEG quality 85).
-- **`images/` is intentionally a library** — contains photos referenced by the site PLUS extras for future use (per owner request). Don't delete unreferenced ones.
+- Real images from the live lefclimbing.com site, optimized to 1800px max (JPEG q85 + `.webp` + `.avif`; AVIFs re-encoded `-q 75`). Each `<img>` ships a `<picture>` with avif/webp/jpg sources.
+- **`images/` is intentionally a library** — keep unreferenced photos (owner request).
+- Library: `bouldering-action.*`, `roped-instruction.*` (originals), plus `youth-group.*` (used in the home hero-promo card), `fitness-center.*`, `lead-climbing.*`, `bouldering-wide.*` (added from the owner's Drive set; available for future use).
+- **Pulling more photos from the owner's Drive folder** (the Drive MCP connector can't see it; use plain HTTP — the folder is "anyone with link"): get the file list from `https://drive.google.com/embeddedfolderview?id=<FOLDER_ID>#list` (server-rendered HTML with `/file/d/<ID>/` links), then download each by ID with `curl -sL "https://drive.google.com/uc?export=download&id=<ID>" -o name.jpg`. Optimize with the pipeline below.
+- Optimize pipeline (matches the repo convention): `sips -s format jpeg -s formatOptions 85 -Z 1800 in.jpg --out images/name.jpg` → `cwebp -q 82 images/name.jpg -o images/name.webp` → `avifenc -q 75 images/name.jpg images/name.avif`. Then add a `<picture>` with avif/webp/jpg sources.
 - Hero photos use `fetchpriority="high" decoding="async"` (no lazy). Below-fold images use `loading="lazy" decoding="async"`.
-- Cinematic image filter (slight desaturate / contrast bump) lives in CSS.
-
 
 ## Forms
 
-- **All forms POST to FormSubmit.co** with `action="https://formsubmit.co/info@lefclimbing.com"`. `info@lefclimbing.com` forwards to the owner anyway, so this is the single inbox.
-  - `contact.html` — general inquiries
-  - `classes.html` (`#inquire` section) — group event/classes inquiries; every "Inquire" / "Email the owner to book" CTA across the booking page is an anchor link to this one form
-  - Chat-bubble widget (injected on every page) — AJAX POST to `formsubmit.co/ajax/info@...`
-  - Hidden `_subject` per form distinguishes contact / booking / apply / chat in the owner's inbox
+- **All forms POST to FormSubmit.co** with `action="https://formsubmit.co/info@lefclimbing.com"`. Single inbox.
+  - `contact.html` — general inquiries (`_subject`: "Contact form …")
+  - `booking.html` (`#inquire`) — group event / booking inquiries; every "Inquire" CTA across the page anchors to this form (`_subject`: "Group booking inquiry …", `_next`: `/booking?sent=1#inquire`)
+  - Chat-bubble widget (injected on every page) — AJAX POST to `formsubmit.co/ajax/info@…`
   - First submission to each `_subject` triggers a one-time FormSubmit activation email — see [MIGRATION.md](MIGRATION.md).
+
+## Events calendar (`/calendar`)
+
+The events page renders a week view (desktop grid / mobile agenda) backed by the Worker route `/api/events`, which proxies LEF's **Redpoint HQ** storefront GraphQL (`https://portal.lefclimbing.com/graphql-public`), normalizes rows, and caches 5 min at the edge. Same vendor as Mosaic; the portal at `portal.lefclimbing.com` is **shared between LEF and Mosaic**, so the LEF `facilityId` is what scopes events to LEF.
+
+- **Vendor: Redpoint HQ.** The `calendar(input)` query requires BOTH `facilityId` AND a `planId` allowlist (an unfiltered query 500s).
+- **`facilityId`**: `RmFjaWxpdHk6MTAwMDAwMDk=` (decodes to `Facility:10000009`; Mosaic is `…0012`). In `src/calendar-config.js`. To re-capture if LEF ever re-keys: load any LEF program page (e.g. `portal.lefclimbing.com/lef/programs/green-team`) and read `sessionFilter.facilityId` from the GraphQL request the SPA fires.
+- **Allowlist (`src/portal-visible-plan-ids.js`)**: AUTO-GENERATED. Unlike Mosaic, **LEF's portal has no public calendar SPA to mirror** (`/lef/n/calendar` 404s; the real portal calendar is `/lef/calendar/n/untitled`). So `scripts/discover-plan-ids.mjs` derives the list straight from GraphQL: every LEF-facility plan with scheduled sessions over the horizon, MINUS the bookable-slot denylist (`EVENT_PLAN_DENYLIST` in config — day passes, group-event passes, 1:1 private lessons; these are reservation inventory, not public events). Today it resolves to 12 plans (Top Rope Class, Climbing 101, Lead Class, Gym to Crag, Yoga, Green/Blue/Purple Club, Advanced Team, Member Events, Summer Camp, Boulder League).
+
+### Adding / retiring events (the GitHub Action)
+
+`.github/workflows/calendar-allowlist.yml` runs **daily** (and on manual dispatch): it re-runs `discover-plan-ids.mjs` and opens a PR when the allowlist drifts. So when the owner schedules a new public program in RedpointHQ, the next run discovers it → PR → merge → it appears on the marketing calendar. Retiring works in reverse. Force a sync now: GitHub → Actions → "Calendar allowlist sync" → Run workflow. Pure `fetch` (no Playwright / chromium / npm install). The PR action is SHA-pinned and kept current by `.github/dependabot.yml`.
+
+Knobs that might need touching in `src/calendar-config.js`: `EVENT_PLAN_DENYLIST` (if a real event's slug ever collides), `CATEGORY_RULES` (publicTitle → youth/member/workshop/event chip category — `member` is intentionally tested before `youth` so "Member Events | Blue/Black" isn't mis-tagged on the word "Blue"), `MONTHS_AHEAD`/`WINDOW_DAYS`.
+
+### Worker + rate limit
+
+`wrangler.jsonc` declares `main: "src/worker.js"`, `assets.binding: "ASSETS"` (static delegation), and an `unsafe.bindings` ratelimit (`EVENTS_RATE_LIMIT`, 60 req/60s per IP, checked before the upstream fan-out). The Worker caches `/api/events` in `caches.default` (`s-maxage=300, swr=600`).
 
 ## SEO + AI discoverability
 
 - Per-page unique `<title>` (≤60 chars), `<meta description>` (140–160 chars), canonical, OG + Twitter.
-- JSON-LD: `SportsActivityLocation` (with `paymentAccepted`, `currenciesAccepted`, `areaServed` for 8 surrounding cities, `hasMap`, `email`, `logo`, `foundingDate`) on every page. Home adds `WebSite` + 2 `Service` blocks (bouldering / ropes). About adds `FAQPage` (TODO: needs LEF-specific FAQ).
-- `llms.txt` at root.
-- `sitemap.xml` and `robots.txt` at root.
-- Page-specific OG images — each page's share preview matches its hero photo.
+- **Clean URLs**: internal links drop the `.html` extension (`href="about"`, brand logo `href="/"`); Workers Assets serves `/about` from `about.html` and 307s `/about.html`→`/about`. Avoids the per-nav redirect penalty.
+- JSON-LD: `SportsActivityLocation` on every page. Home adds `WebSite` + 3 `Service` blocks (bouldering / ropes / yoga). About has a visible FAQ whose copy mirrors its `FAQPage` JSON-LD (Google requires the structured data to match visible content — keep them in sync). `foundingDate` is omitted until the owner confirms LEF's open date — don't invent it.
+- `llms.txt`, `sitemap.xml`, `robots.txt` at root.
 
 ## Accessibility
 
-- Each page has exactly one `<h1>`.
-- No skipped levels.
-- Footer column labels use `<p class="foot-heading">` not `<h4>` to avoid heading-order violations.
-- axe-core WCAG 2.1 AA — **zero violations** across all 9 main pages as of last check. Run via Chrome DevTools or via the chrome MCP if available.
-- Every `<img>` has descriptive `alt`. Decorative images (e.g. youth-circle inside the hero promo link) use `alt=""` — intentional.
+- Each page has exactly one `<h1>`. No skipped levels. Footer column labels use `<p class="foot-heading">`.
+- axe-core WCAG 2.1 AA target: zero violations. Run via Chrome DevTools / chrome MCP.
+- Every `<img>` has descriptive `alt`; decorative images use `alt=""`.
 
 ## Cache busting
 
-Every HTML file references `styles.css?v=N` and `script.js?v=M`. Current values:
+Every HTML file references `styles.css?v=N`, `script.js?v=M`, and (on `/calendar`) `calendar.js?v=K`. Current values:
 
-- `styles.css?v=1`
-- `script.js?v=1`
+- `styles.css?v=4`
+- `script.js?v=2`
+- `calendar.js?v=1`
 
-Bump the relevant version across every HTML file when the file changes:
+Bump across every HTML file when the file changes (calendar.js only appears in calendar.html):
 
 ```bash
-# CSS bump (39 → 40)
-for f in *.html; do sed -i '' 's/styles\.css?v=39/styles.css?v=1/g' "$f"; done
-
-# JS bump (5 → 6)
-for f in *.html; do sed -i '' 's/script\.js?v=5/script.js?v=1/g' "$f"; done
+# CSS bump (4 → 5)
+for f in *.html; do sed -i '' 's/styles\.css?v=4/styles.css?v=5/g' "$f"; done
+# JS bump (2 → 3)
+for f in *.html; do sed -i '' 's/script\.js?v=2/script.js?v=3/g' "$f"; done
+# calendar.js bump (1 → 2)
+sed -i '' 's/calendar\.js?v=1/calendar.js?v=2/g' calendar.html
 ```
 
-Required regardless of host: `_headers` sets `Cache-Control: immutable, max-age=31536000` on `/styles.css` and `/script.js`, so browsers won't refetch without the `?v=N` change.
+`_headers` sets `Cache-Control: immutable, max-age=31536000` on `/styles.css`, `/script.js`, `/calendar.js`, `/images/*`, `/fonts/*`. `/api/events` has its own 5-min edge cache (see Events calendar).
 
 ## Deploy
 
-**Push to `main` on GitHub → Cloudflare auto-deploys.** The `lef-climbing` Worker on Cloudflare is connected to the `mosaic-climbing/lef-climbing` GitHub repo via **Cloudflare Workers Builds**. Every push to `main` kicks off a build that uploads the static assets in `.` (per [wrangler.jsonc](wrangler.jsonc)) to the Worker. `_headers` and `_redirects` are honored by Workers Assets.
+**Push to `main` on GitHub → Cloudflare auto-deploys** (Cloudflare Workers Builds, connected to `mosaic-climbing/lef-climbing`). Every push uploads the static assets and bundles `src/worker.js`. `_headers` and `_redirects` are honored.
 
 ```bash
 git add ... && git commit -m "..." && git push origin main
 ```
 
-Check the build at https://dash.cloudflare.com → Workers & Pages → `lef-climbing` → **Deployments** (or **Builds**). Each push gets a build log; the deploy URL is `https://lef-climbing.chris-shotwell.workers.dev/`.
+Check the build at https://dash.cloudflare.com → Workers & Pages → `lef-climbing` → Deployments. Don't run `wrangler deploy` locally (bypasses Git history + the build pipeline).
 
-No local `wrangler deploy` needed (and don't run it — it bypasses the Git history and the build pipeline). For ad-hoc manual deploys you'd need `CLOUDFLARE_API_TOKEN` set anyway; pushing to `main` is the supported path.
-
-Zone-level Cloudflare settings (SSL/TLS Full Strict, HTTP/3, Auto Minify HTML/CSS/JS, Brotli, etc.) are configured by `scripts/harden-cloudflare.sh`, wrapped in the [cloudflare-harden.yml](.github/workflows/cloudflare-harden.yml) GitHub Action (manual trigger). Surge.sh preview is retired. See [MIGRATION.md](MIGRATION.md) for the full Wix → Cloudflare migration story.
+Zone-level settings are configured by `scripts/harden-cloudflare.sh` (wrapped in [cloudflare-harden.yml](.github/workflows/cloudflare-harden.yml)). See [MIGRATION.md](MIGRATION.md) for the Wix → Cloudflare story.
 
 ## Things the owner has rejected (do not reintroduce)
 
@@ -152,17 +180,25 @@ Zone-level Cloudflare settings (SSL/TLS Full Strict, HTTP/3, Auto Minify HTML/CS
 - Text-shadow on the hero headline
 - Invented copy anywhere
 - Double-arrow on link-with-arrow elements (`.tlink::after` adds the arrow; don't also put `→` in the link text)
+- A "what sets us apart / vs competitors" section — LEF is the only gym in Lexington, so don't port Mosaic's competitive-superlatives list.
 
 ## Outstanding / nice-to-haves
 
-- Hero photo brightness can sometimes hide the climber subject — check the source image's vertical composition before swapping `hero-real.jpg`.
+- **Photos.** The home hero-promo card (youth teaser → `booking#youth`) is now wired with `youth-group.jpg`. `fitness-center.*`, `lead-climbing.*`, `bouldering-wide.*` are in the library but not yet placed — candidates to give the disciplines/booking their own imagery instead of reusing the two originals, or to add a Fitness discipline (the gym has a real fitness center — see `fitness-center.jpg`). No yoga-studio photo exists in the owner's set, so the About "Yoga" section stays text-only for now. ~250 more photos are in the Drive folder (see Photos section for how to pull them).
+- About FAQ specifics (auto-belay weight range 25–310lbs, under-14 supervision) are carried from the original site's JSON-LD — confirm they're LEF-true and update the visible FAQ + JSON-LD together if not.
+- `foundingDate` JSON-LD pending the owner's confirmed open date.
+- Holiday-closures list on `/calendar` is a single hardcoded entry — owner to maintain.
 - Mobile (≤380px) renders fine but hasn't been aggressively tuned.
 
 ## Don't
 
-- Don't add a build step or framework.
+- Don't add a build step or frontend framework. The `src/` Worker IS bundled by CF Workers Builds — that's the Worker entry only.
+- Don't add npm runtime dependencies to the calendar tooling — it's deliberately zero-dep (`fetch`/`http`/`fs`). CI runs no `npm install`.
 - Don't add tracking / analytics scripts without asking.
-- Don't change the navigation order (About / Classes / Membership / Calendar / Contact / Climb With Us).
+- Don't change the navigation order (About / Booking / Membership / Calendar / Contact / Climb With Us).
 - Don't replace the chat widget injection in `script.js` — the owner asked for that bottom-right contact bubble.
 - Don't add an email-collection modal — owner doesn't want intrusive popups.
-- Don't delete unreferenced photos in `images/` — owner keeps them as a library for future use.
+- Don't delete unreferenced photos in `images/` — owner keeps them as a library.
+- Don't add `.html` to internal `href`s — use clean URLs (`href="about"`, home is `href="/"`).
+- Don't hand-edit `src/portal-visible-plan-ids.js` — it's regenerated by `discover-plan-ids.mjs` / the daily Action.
+- Don't widen the CSP in `_headers` to `'unsafe-inline'` for scripts. JSON-LD blocks are exempt; the site has no executable inline scripts. Allowlist a new origin only when you actually add a third-party script.

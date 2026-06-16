@@ -32,14 +32,14 @@
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
-  // aria-current on nav
-  const file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  // aria-current on nav. Clean URLs: compare the basename with any ".html"
+  // stripped, so it matches whether the page is served as /about or /about.html.
+  const file = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
   document.querySelectorAll('.nav-list a').forEach((a) => {
-    const href = (a.getAttribute('href') || '').toLowerCase();
-    if (!href || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel')) return;
-    if (href === file || (file === '' && href === 'index.html') || (file === 'index.html' && href === './')) {
-      a.setAttribute('aria-current', 'page');
-    }
+    let href = (a.getAttribute('href') || '').toLowerCase();
+    if (!href || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel') || href.startsWith('#')) return;
+    href = href.replace(/^\.?\//, '').replace(/\.html$/, '').split('#')[0];
+    if (href && href === file) a.setAttribute('aria-current', 'page');
   });
 
   // Year auto-fill
@@ -82,7 +82,7 @@
           <span>Usually replies within a day</span>
         </div>
       </header>
-      <p class="chat-bubble">Hey — got a question? Drop us a note and we'll get back to you. For classes, see the <a href="classes.html" style="color: var(--clay); border-bottom: 1px solid var(--clay); text-decoration: none;">classes page</a>.</p>
+      <p class="chat-bubble">Hey — got a question? Drop us a note and we'll get back to you. For classes and group events, see the <a href="booking" style="color: var(--clay); border-bottom: 1px solid var(--clay); text-decoration: none;">booking page</a>.</p>
       <form class="chat-form" data-chat-form novalidate>
         <div class="field-row">
           <div class="field"><label for="chat-name" style="font-size: var(--t-xs);">Name</label><input class="input" id="chat-name" name="name" type="text" autocomplete="name" required /></div>
