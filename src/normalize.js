@@ -71,7 +71,7 @@ function stripHtml(s) {
 // The slug isn't returned by StorefrontCalendarQuery; we look it up via the
 // planId from a sibling StorefrontPlansQuery fetched alongside the calendar
 // (see src/scrape.js). If the lookup misses (shouldn't, but defensive), we
-// fall back to the LEF storefront home — LEF's portal has no /n/calendar page.
+// fall back to the LEF storefront home.
 function urlFor(row, plansById) {
   const params = new URLSearchParams({ course: row.courseId });
   if (row.sessionFacilityHash) params.set('session', row.sessionFacilityHash);
