@@ -33,10 +33,16 @@ export const WINDOW_DAYS = 21;
 // full recurring-class horizon without hammering the API.
 export const MONTHS_AHEAD = 6;
 
-// NOTE: LEF has NO bookable-slot denylist (unlike Mosaic). LEF sells day passes
-// by reservation *through this calendar*, so day-pass plans are intentionally
-// part of the public calendar and must show. The source of truth is LEF's own
-// portal calendar SPA: whatever it queries for, we mirror — nothing filtered.
+// NOTE: the plan ALLOWLIST has no denylist (unlike Mosaic) — it faithfully
+// mirrors LEF's portal calendar SPA, day-pass plans included.
+//
+// But at RENDER time we hide day passes from the events grid: they're
+// reservation-only and surfaced via a dedicated "Reserve a day pass" CTA
+// (homepage / calendar / climb-with-us), so showing hundreds of individual
+// day-pass reservation slots as chips would bury the actual programs. This
+// regex is matched against each plan's vendor slug in buildPayload(). Keep it
+// narrow — it should only ever match the day-pass plan(s).
+export const CALENDAR_HIDE_SLUGS = /day-pass/i;
 
 // Heuristic mapping from a publicTitle to one of our four UI categories.
 // Order matters — first match wins. `member` is checked BEFORE `youth` so a

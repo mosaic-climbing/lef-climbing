@@ -1,4 +1,4 @@
-import { CATEGORY_RULES } from './calendar-config.js';
+import { CATEGORY_RULES, CALENDAR_HIDE_SLUGS } from './calendar-config.js';
 
 function categoryFor(title) {
   for (const rule of CATEGORY_RULES) {
@@ -101,7 +101,17 @@ export function normalizeRow(row, plansById) {
 }
 
 export function buildPayload(rows, plansById, { now = new Date() } = {}) {
+  // Drop plans we surface as a dedicated CTA rather than as grid chips
+  // (LEF day passes — reservation-only, handled by a "Reserve a day pass"
+  // button on the homepage/calendar/climb-with-us pages). The allowlist
+  // still faithfully mirrors the portal SPA; this is an editorial render-
+  // time choice so the events grid isn't swamped by hundreds of day-pass
+  // reservation slots. See CALENDAR_HIDE_SLUGS in calendar-config.js.
   const events = rows
+    .filter((r) => {
+      const slug = plansById?.get(r.planId)?.slug || '';
+      return !CALENDAR_HIDE_SLUGS.test(slug);
+    })
     .map((r) => normalizeRow(r, plansById))
     .sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0));
   return {
