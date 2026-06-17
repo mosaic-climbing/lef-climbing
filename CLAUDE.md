@@ -5,7 +5,7 @@ Static marketing site for LEF Climbing (indoor climbing gym, 916 N Broadway, Lex
 ## Stack
 
 - Plain HTML + one CSS file + two JS files (`script.js` on every page, `calendar.js` only on `/calendar`). **No frontend framework and no build step for the pages.** There IS a small Cloudflare Worker entry (`src/worker.js`) that serves `/api/events` for the live events calendar — Workers Builds bundles it on push. See the **Events calendar** section below.
-- A dev-only `scripts/package.json` exists but declares **zero runtime dependencies** — the calendar tooling (`scripts/discover-plan-ids.mjs`, `scripts/dev-server.mjs`) uses Node built-ins only (`fetch`, `http`, `fs`). Nothing to `npm install`; CI runs no `npm install`. Keep it that way.
+- `scripts/dev-server.mjs` (local preview) uses Node built-ins only — nothing to install. `scripts/capture-calendar-input.mjs` (the daily allowlist sync) uses **Playwright**, declared in `scripts/package.json`; the GitHub Action `npm ci`s it + downloads headless Chromium. Don't add deps to the runtime Worker (`src/`) — those stay framework-free.
 - **Hosting**: Cloudflare Workers Assets (static) **+ Worker entry (`src/worker.js`)** for `/api/events`. See [MIGRATION.md](MIGRATION.md) for the Wix → Cloudflare cutover.
   - Active deploy URL: `https://lef-climbing.chris-shotwell.workers.dev/`
   - Target custom domain: `lefclimbing.com` (cutover from Wix per MIGRATION.md)
@@ -41,10 +41,14 @@ src/                    Worker source (bundled by Workers Builds on push)
   events-api.js           GET /api/events — rate limit, 5-min edge cache, error handling
   scrape.js               StorefrontPlansQuery + windowed StorefrontCalendarQuery (parallel)
   normalize.js            rphq row → events.json row; deep-link URLs via planId→slug map
-  calendar-config.js      vendor knobs: GRAPHQL_URL, facilityId, denylist, category rules
-  portal-visible-plan-ids.js   AUTO-GENERATED allowlist of plan IDs (don't hand-edit)
+  calendar-config.js      vendor knobs: GRAPHQL_URL, facilityId, category rules
+  portal-visible-plan-ids.js   AUTO-GENERATED allowlist of plan IDs the LEF
+                               portal calendar SPA queries for (don't hand-edit)
 scripts/
-  discover-plan-ids.mjs   regenerates the allowlist from GraphQL (no Playwright) — see calendar
+  capture-calendar-input.mjs   Playwright capture of the LEF calendar SPA's
+                               StorefrontCalendarQuery planId[] — see calendar
+  render-allowlist-diff.py     turns an allowlist diff into named programs for
+                               the bot PR body
   dev-server.mjs          npm-free local server (static + /api/events) for local calendar testing
   harden-cloudflare.sh    one-shot zone hardening (SSL/HTTP3/etc.) — see Deploy
   package.json            dev-only, ZERO dependencies
@@ -110,14 +114,14 @@ favicon.ico, favicon-32.png, favicon-192.png, apple-touch-icon.png
 The events page renders a week view (desktop grid / mobile agenda) backed by the Worker route `/api/events`, which proxies LEF's **Redpoint HQ** storefront GraphQL (`https://portal.lefclimbing.com/graphql-public`), normalizes rows, and caches 5 min at the edge. Same vendor as Mosaic; the portal at `portal.lefclimbing.com` is **shared between LEF and Mosaic**, so the LEF `facilityId` is what scopes events to LEF.
 
 - **Vendor: Redpoint HQ.** The `calendar(input)` query requires BOTH `facilityId` AND a `planId` allowlist (an unfiltered query 500s).
-- **`facilityId`**: `RmFjaWxpdHk6MTAwMDAwMDk=` (decodes to `Facility:10000009`; Mosaic is `…0012`). In `src/calendar-config.js`. To re-capture if LEF ever re-keys: load any LEF program page (e.g. `portal.lefclimbing.com/lef/programs/green-team`) and read `sessionFilter.facilityId` from the GraphQL request the SPA fires.
-- **Allowlist (`src/portal-visible-plan-ids.js`)**: AUTO-GENERATED. Unlike Mosaic, **LEF's portal has no public calendar SPA to mirror** (`/lef/n/calendar` 404s; the real portal calendar is `/lef/calendar/n/untitled`). So `scripts/discover-plan-ids.mjs` derives the list straight from GraphQL: every LEF-facility plan with scheduled sessions over the horizon, MINUS the bookable-slot denylist (`EVENT_PLAN_DENYLIST` in config — day passes, group-event passes, 1:1 private lessons; these are reservation inventory, not public events). Today it resolves to 12 plans (Top Rope Class, Climbing 101, Lead Class, Gym to Crag, Yoga, Green/Blue/Purple Club, Advanced Team, Member Events, Summer Camp, Boulder League).
+- **`facilityId`**: `RmFjaWxpdHk6MTAwMDAwMDk=` (decodes to `Facility:10000009`; Mosaic is `…0012`). In `src/calendar-config.js`. Won't change unless LEF re-keys the portal; if it does, run `node scripts/capture-calendar-input.mjs` (verbose mode) and copy the field.
+- **Allowlist (`src/portal-visible-plan-ids.js`)**: AUTO-GENERATED. It **mirrors the planId[] LEF's own public calendar SPA queries for** — the portal calendar lives at `https://portal.lefclimbing.com/lef/calendar/n/untitled` (NOT `/lef/n/calendar`, which 404s). The portal calendar is the source of truth: whatever it shows, the marketing calendar shows. **No denylist** — unlike Mosaic, LEF sells day passes by reservation *through this calendar*, so day-pass plans are intentionally included. Today it resolves to 14 plans (Top Rope Class, Climbing 101, Lead Class, Gym to Crag, Yoga, Green/Blue/Purple Club, Advanced Team, Member Events, Summer Camp, Boulder League, Day Pass).
 
 ### Adding / retiring events (the GitHub Action)
 
-`.github/workflows/calendar-allowlist.yml` runs **daily** (and on manual dispatch): it re-runs `discover-plan-ids.mjs` and opens a PR when the allowlist drifts. So when the owner schedules a new public program in RedpointHQ, the next run discovers it → PR → merge → it appears on the marketing calendar. Retiring works in reverse. Force a sync now: GitHub → Actions → "Calendar allowlist sync" → Run workflow. Pure `fetch` (no Playwright / chromium / npm install). The PR action is SHA-pinned and kept current by `.github/dependabot.yml`.
+`.github/workflows/calendar-allowlist.yml` runs **daily** (and on manual dispatch): `scripts/capture-calendar-input.mjs` loads the LEF portal calendar in headless Chromium, reads the `planId[]` the SPA fires in its `StorefrontCalendarQuery`, and opens a PR when the set drifts from what's committed. So when staff add a program to the **portal calendar** (`/lef/calendar/n/untitled`), the next run mirrors it → PR (with a human-readable Added/Removed list via `scripts/render-allowlist-diff.py`) → merge → it appears on the marketing calendar. Retiring works in reverse. Force a sync now: GitHub → Actions → "Calendar allowlist sync" → Run workflow. The PR action is SHA-pinned and kept current by `.github/dependabot.yml`.
 
-Knobs that might need touching in `src/calendar-config.js`: `EVENT_PLAN_DENYLIST` (if a real event's slug ever collides), `CATEGORY_RULES` (publicTitle → youth/member/workshop/event chip category — `member` is intentionally tested before `youth` so "Member Events | Blue/Black" isn't mis-tagged on the word "Blue"), `MONTHS_AHEAD`/`WINDOW_DAYS`.
+Knobs that might need touching in `src/calendar-config.js`: `CATEGORY_RULES` (publicTitle → youth/member/workshop/event chip category — `member` is intentionally tested before `youth` so "Member Events | Blue/Black" isn't mis-tagged on the word "Blue"), `MONTHS_AHEAD`/`WINDOW_DAYS`.
 
 ### Worker + rate limit
 
@@ -200,5 +204,5 @@ Zone-level settings are configured by `scripts/harden-cloudflare.sh` (wrapped in
 - Don't add an email-collection modal — owner doesn't want intrusive popups.
 - Don't delete unreferenced photos in `images/` — owner keeps them as a library.
 - Don't add `.html` to internal `href`s — use clean URLs (`href="about"`, home is `href="/"`).
-- Don't hand-edit `src/portal-visible-plan-ids.js` — it's regenerated by `discover-plan-ids.mjs` / the daily Action.
+- Don't hand-edit `src/portal-visible-plan-ids.js` — it's regenerated by `scripts/capture-calendar-input.mjs` / the daily Action.
 - Don't widen the CSP in `_headers` to `'unsafe-inline'` for scripts. JSON-LD blocks are exempt; the site has no executable inline scripts. Allowlist a new origin only when you actually add a third-party script.
