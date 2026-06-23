@@ -49,9 +49,9 @@
   function buildChatWidget() {
     if (document.querySelector('[data-chat-fab]')) return; // already present
 
-    // Submissions land in info@lefclimbing.com via FormSubmit's AJAX endpoint
-    const ENDPOINT = 'https://formsubmit.co/ajax/info@lefclimbing.com';
-    const FALLBACK_EMAIL = 'info@lefclimbing.com';
+    // Submissions land in nicole@lefclimbing.com via FormSubmit's AJAX endpoint
+    const ENDPOINT = 'https://formsubmit.co/ajax/nicole@lefclimbing.com';
+    const FALLBACK_EMAIL = 'nicole@lefclimbing.com';
 
     const fab = document.createElement('button');
     fab.type = 'button';

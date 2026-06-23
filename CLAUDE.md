@@ -1,6 +1,6 @@
 # LEF Climbing — site handoff
 
-Static marketing site for LEF Climbing (indoor climbing gym, 916 N Broadway, Lexington, KY 40505 — phone 859-523-0518, opened TBD (confirm with owner)). Replaces the existing Wix site at https://www.lefclimbing.com. Owner is the owner; primary maintainer is Chris. Site contact email is `info@lefclimbing.com` (also where all form submissions are delivered). LEF is the only climbing gym in Lexington.
+Static marketing site for LEF Climbing (indoor climbing gym, 916 N Broadway, Lexington, KY 40505 — phone 859-523-0518, opened TBD (confirm with owner)). Replaces the existing Wix site at https://www.lefclimbing.com. Owner is the owner; primary maintainer is Chris. Public site contact email is `info@lefclimbing.com` (shown in the JSON-LD); **all form submissions are delivered to `nicole@lefclimbing.com`** — kept distinct from Mosaic's inbox. LEF is the only climbing gym in Lexington.
 
 ## Stack
 
@@ -15,7 +15,7 @@ Static marketing site for LEF Climbing (indoor climbing gym, 916 N Broadway, Lex
   - Repo: `mosaic-climbing/lef-climbing` on GitHub. Public.
 - Local dev: `python3 -m http.server 8000` for the static pages — but `/api/events` won't work under it, so the calendar shows its error state. To preview the **live calendar locally with no npm**, run `node scripts/dev-server.mjs` (serves the site + `/api/events` on `http://localhost:8000`). `npx wrangler dev` also works but pulls wrangler via npm.
 - **Fonts**: League Spartan (display weight 900) + Inter (body weights 400/500/600/700/800) + JetBrains Mono (numerics 500). **Self-hosted** under `/fonts/` — the `@font-face` rules live inline at the top of `styles.css`. Originally pulled from Google Fonts; switched to self-hosting to eliminate two third-party round-trips.
-- **No JS framework**. `script.js` handles: mobile nav toggle, sticky-header scroll state, `aria-current` on nav (clean-URL aware), year auto-fill, injected chat widget (POSTs to FormSubmit → `info@lefclimbing.com`). `calendar.js` renders the events week-view (only loaded on `/calendar`). LightWidget Instagram embed and Flodesk newsletter from Mosaic were removed; not in use. Don't add libraries.
+- **No JS framework**. `script.js` handles: mobile nav toggle, sticky-header scroll state, `aria-current` on nav (clean-URL aware), year auto-fill, injected chat widget (POSTs to FormSubmit → `nicole@lefclimbing.com`). `calendar.js` renders the events week-view (only loaded on `/calendar`). LightWidget Instagram embed and Flodesk newsletter from Mosaic were removed; not in use. Don't add libraries.
 
 ## File map
 
@@ -103,10 +103,10 @@ favicon.ico, favicon-32.png, favicon-192.png, apple-touch-icon.png
 
 ## Forms
 
-- **All forms POST to FormSubmit.co** with `action="https://formsubmit.co/info@lefclimbing.com"`. Single inbox.
+- **All forms POST to FormSubmit.co** with `action="https://formsubmit.co/nicole@lefclimbing.com"`. Single inbox, LEF-specific (not shared with Mosaic).
   - `contact.html` — general inquiries (`_subject`: "Contact form …")
   - `booking.html` (`#inquire`) — group event / booking inquiries; every "Inquire" CTA across the page anchors to this form (`_subject`: "Group booking inquiry …", `_next`: `/booking?sent=1#inquire`)
-  - Chat-bubble widget (injected on every page) — AJAX POST to `formsubmit.co/ajax/info@…`
+  - Chat-bubble widget (injected on every page) — AJAX POST to `formsubmit.co/ajax/nicole@…`
   - First submission to each `_subject` triggers a one-time FormSubmit activation email — see [MIGRATION.md](MIGRATION.md).
 
 ## Events calendar (`/calendar`)

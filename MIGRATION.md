@@ -30,7 +30,8 @@ This guide walks you through migrating the live `lefclimbing.com` site from Wix 
 - [ ] Cloudflare account ([dash.cloudflare.com](https://dash.cloudflare.com)) — already created, has the Workers project
 - [ ] Dreamhost account (target registrar) — create one if you don't have it: [dreamhost.com](https://dreamhost.com)
 - [ ] Google Search Console ([search.google.com/search-console](https://search.google.com/search-console)) — for post-cutover indexing
-- [ ] Inbox access for `info@lefclimbing.com` (FormSubmit confirmation emails go here)
+- [ ] Inbox access for `nicole@lefclimbing.com` (FormSubmit confirmation emails + all form submissions go here)
+- [ ] Inbox access for `info@lefclimbing.com` (still the public contact address / used for the email-deliverability test)
 
 **Things to have on hand:**
 - [ ] Credit card (Dreamhost transfer fee ~$15 for `.com`)
@@ -71,7 +72,7 @@ The new site is at `https://lef-climbing.chris-shotwell.workers.dev/` (until DNS
 - [ ] Submit a test on `/classes` — same flow
 - [ ] Submit a test via the chat bubble (bottom right) — inline thank-you message
 
-For each form submission, you'll get a **FormSubmit confirmation email** at `info@lefclimbing.com` the first time. **Click the activation link** in each — that's a one-time setup so submissions land in the inbox automatically going forward.
+For each form submission, you'll get a **FormSubmit confirmation email** at `nicole@lefclimbing.com` the first time. **Click the activation link** in each — that's a one-time setup so submissions land in the inbox automatically going forward.
 
 ### 1.3 Add `lefclimbing.com` to Cloudflare (15 min)
 
@@ -304,7 +305,7 @@ Run through this list 1–2 hours after the cutover, and again after 24 h:
 - [ ] Chat bubble opens and the form sends
 
 **Forms:**
-- [ ] Test contact form → confirmation email appears at `info@lefclimbing.com`
+- [ ] Test contact form → confirmation email appears at `nicole@lefclimbing.com`
 - [ ] Test booking form → same
 - [ ] Test chat bubble → same
 
@@ -359,7 +360,7 @@ If the issue is mid-Phase 4 (registrar transfer), it's harder to roll back — W
 - Wix: https://manage.wix.com
 - Dreamhost: https://panel.dreamhost.com
 - Google Search Console: https://search.google.com/search-console
-- FormSubmit: configured per-email; submissions delivered to `info@lefclimbing.com`
+- FormSubmit: configured per-email; submissions delivered to `nicole@lefclimbing.com`
 
 ### Files in repo that matter for the cutover
 
@@ -469,7 +470,7 @@ T (transfer completes — you'll get a Dreamhost email):
 
 - [ ] **Verify MX records imported** in Cloudflare DNS (Phase 1.3 checklist) — last chance to catch a missing one before email matters.
 - [ ] **Add CLOUDFLARE_API_TOKEN to GitHub secrets** so the hardening Action runs the moment Cloudflare goes Active. Permissions: `Zone Settings: Edit + Zone: Read + Account Rulesets: Edit`, scoped to `lefclimbing.com`. Add at https://github.com/mosaic-climbing/lef-climbing/settings/secrets/actions.
-- [ ] **Test every form one more time** at https://lef-climbing.chris-shotwell.workers.dev — and click the FormSubmit confirmation email at `info@lefclimbing.com` so the first real submission post-cutover works without a hiccup.
+- [ ] **Test every form one more time** at https://lef-climbing.chris-shotwell.workers.dev — and click the FormSubmit confirmation email at `nicole@lefclimbing.com` so the first real submission post-cutover works without a hiccup.
 - [ ] **Verify the EPP transfer code worked** — Dreamhost should show the transfer "In Progress" with an expected completion date. If Dreamhost shows "Failed" or asks for a fresh code, get one from Wix again.
 - [ ] **Don't lower TTL at Wix** — you can't (Wix has locked DNS) and it doesn't matter; nameserver propagation runs on a different timer than record TTLs.
 
