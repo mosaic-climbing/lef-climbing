@@ -14,6 +14,6 @@
 /classes      /booking  301
 /classes.html /booking  301
 
-# Note: www → apex canonicalization is handled at the Cloudflare domain
+# Note: apex → www canonicalization is handled at the Cloudflare domain
 # level (Rules → Redirect Rules) once the custom domain is wired up
 # post-cutover. _redirects only accepts relative paths, not cross-host.

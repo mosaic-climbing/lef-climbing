@@ -156,22 +156,22 @@ Once Cloudflare shows the domain as Active:
 ### 2.4 Test (5 min)
 
 ```bash
-# Apex serves the new site
-curl -sI https://lefclimbing.com/ | head -3
+# www serves the new site (canonical host)
+curl -sI https://www.lefclimbing.com/ | head -3
 # Expect: HTTP/2 200
 
-# www serves the new site OR redirects to apex
-curl -sI https://www.lefclimbing.com/ | head -3
-# Expect: HTTP/2 200 (or 301 to apex once redirect rule is added in Phase 3)
+# Apex redirects to www
+curl -sI https://lefclimbing.com/ | head -3
+# Expect: HTTP/2 301 to https://www.lefclimbing.com/ (once the redirect rule is added in Phase 2.5)
 
 # Latest content live (matching the workers.dev URL)
-curl -s https://lefclimbing.com/ | grep -E "v=37|hero-real\.avif|fonts/fonts\.css"
+curl -s https://www.lefclimbing.com/ | grep -E "v=37|hero-real\.avif|fonts/fonts\.css"
 # Expect: same set of strings as on workers.dev
 
-# All redirects working
-curl -sI https://lefclimbing.com/details   # → 301 to /about
-curl -sI https://lefclimbing.com/instruction # → 301 to /classes
-curl -sI https://lefclimbing.com/events     # → 301 to /calendar
+# All legacy-path redirects working (test on www to skip the apex→www hop)
+curl -sI https://www.lefclimbing.com/details     # → 301 to /about
+curl -sI https://www.lefclimbing.com/instruction # → 301 to /classes
+curl -sI https://www.lefclimbing.com/events      # → 301 to /calendar
 ```
 
 In a browser, click through:
@@ -214,7 +214,7 @@ Set up Cloudflare's recommended security/performance settings via the GitHub Act
    - Brotli, auto minify, early hints, browser cache TTL
    - Email obfuscation, hotlink protection, server-side excludes, browser integrity check, security level medium, IPv6
    - Bot Fight Mode
-   - **www → apex 301 redirect rule**
+   - **apex → www 301 redirect rule**
 
 If anything red: copy the error and run the script locally with `CLOUDFLARE_API_TOKEN=... ./scripts/harden-cloudflare.sh` for clearer output.
 
@@ -296,8 +296,8 @@ If it returns Dreamhost names (`ns1.dreamhost.com` etc.) → at Dreamhost: chang
 Run through this list 1–2 hours after the cutover, and again after 24 h:
 
 **Site:**
-- [ ] `https://lefclimbing.com/` → loads new site
-- [ ] `https://www.lefclimbing.com/` → 301 redirects to apex
+- [ ] `https://www.lefclimbing.com/` → loads new site
+- [ ] `https://lefclimbing.com/` → 301 redirects to www
 - [ ] All 11 main pages load without 404
 - [ ] No mixed-content warnings (everything HTTPS)
 - [ ] Hero images load
@@ -370,7 +370,7 @@ If the issue is mid-Phase 4 (registrar transfer), it's harder to roll back — W
 | `_headers` | Security headers + asset cache rules |
 | `wrangler.jsonc` | Cloudflare Workers config (publishes the static site) |
 | `sitemap.xml` | Updated to use new clean URLs |
-| `scripts/harden-cloudflare.sh` | Idempotent zone hardening + www→apex redirect rule |
+| `scripts/harden-cloudflare.sh` | Idempotent zone hardening + apex→www redirect rule |
 | `.github/workflows/cloudflare-harden.yml` | One-click GitHub Action wrapping the hardening script |
 
 ### Required GitHub secret
