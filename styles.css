@@ -1096,12 +1096,16 @@ hr.rule-strong { border: 0; border-top: 1.5px solid var(--ink); margin-block: va
 .foot-list { display: flex; flex-direction: column; gap: var(--s-2); }
 .foot-list a { font-size: var(--t-sm); }
 .hours { display: grid; grid-template-columns: 1fr auto; gap: var(--s-2) var(--s-5); }
-.hours dt, .hours dd { font-size: var(--t-sm); color: rgba(255, 255, 255, 0.85); }
-.hours dt { color: rgba(255, 255, 255, 0.6); }
-.hours dd { font-feature-settings: var(--tnum); color: var(--bone); font-weight: 600; }
-/* Footer hours: pack day + time together on the left instead of stretching them
-   to opposite edges of the column. */
+/* Defaults suit a light section (e.g. the calendar Hours block). The footer
+   sits on a dark section and overrides these to light below. */
+.hours dt, .hours dd { font-size: var(--t-sm); }
+.hours dt { color: var(--ink-mute); }
+.hours dd { font-feature-settings: var(--tnum); color: var(--ink); font-weight: 600; }
+/* Footer hours: dark section — light text, and pack day + time together on the
+   left instead of stretching them to opposite edges of the column. */
 .site-foot .hours { grid-template-columns: max-content max-content; justify-content: start; column-gap: var(--s-6); }
+.site-foot .hours dt { color: rgba(255, 255, 255, 0.6); }
+.site-foot .hours dd { color: var(--bone); }
 .foot-hours-note { margin-top: var(--s-3); font-size: var(--t-xs); color: rgba(255, 255, 255, 0.85); }
 .foot-hours-note strong { color: var(--bone); font-weight: 700; }
 .foot-rule {
