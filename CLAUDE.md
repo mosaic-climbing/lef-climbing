@@ -144,17 +144,17 @@ Knobs that might need touching in `src/calendar-config.js`: `CATEGORY_RULES` (pu
 
 Every HTML file references `styles.css?v=N`, `script.js?v=M`, and (on `/calendar`) `calendar.js?v=K`. Current values:
 
-- `styles.css?v=4`
-- `script.js?v=2`
+- `styles.css?v=6`
+- `script.js?v=3`
 - `calendar.js?v=1`
 
 Bump across every HTML file when the file changes (calendar.js only appears in calendar.html):
 
 ```bash
-# CSS bump (4 → 5)
-for f in *.html; do sed -i '' 's/styles\.css?v=4/styles.css?v=5/g' "$f"; done
-# JS bump (2 → 3)
-for f in *.html; do sed -i '' 's/script\.js?v=2/script.js?v=3/g' "$f"; done
+# CSS bump (6 → 7)
+for f in *.html; do sed -i '' 's/styles\.css?v=6/styles.css?v=7/g' "$f"; done
+# JS bump (3 → 4)
+for f in *.html; do sed -i '' 's/script\.js?v=3/script.js?v=4/g' "$f"; done
 # calendar.js bump (1 → 2)
 sed -i '' 's/calendar\.js?v=1/calendar.js?v=2/g' calendar.html
 ```
