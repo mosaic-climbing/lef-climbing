@@ -10,7 +10,7 @@ Static marketing site for LEF Climbing (indoor climbing gym, 916 N Broadway, Lex
   - Active deploy URL: `https://lef-climbing.chris-shotwell.workers.dev/`
   - Target custom domain: `lefclimbing.com` (cutover from Wix per MIGRATION.md)
   - Deploy: push to `main` → Cloudflare Workers Builds auto-deploys (see Deploy section below).
-  - Config: [wrangler.jsonc](wrangler.jsonc) (`main: "src/worker.js"`, `assets.binding: "ASSETS"`, a ratelimit `unsafe.binding`); security/cache headers + CSP in [_headers](_headers); legacy URL 301s in [_redirects](_redirects); [.assetsignore](.assetsignore) keeps server-only paths (`src/`, `scripts/`, `.github/`, `wrangler.jsonc`, docs) out of the public asset bundle.
+  - Config: [wrangler.jsonc](wrangler.jsonc) (`main: "src/worker.js"`, `assets.binding: "ASSETS"`, `assets.not_found_handling: "404-page"` — serves `404.html` with a 404 status for unmatched paths; without it the 404 is an empty body — and a ratelimit `unsafe.binding`); security/cache headers + CSP in [_headers](_headers); legacy URL 301s in [_redirects](_redirects); [.assetsignore](.assetsignore) keeps server-only paths (`src/`, `scripts/`, `.github/`, `wrangler.jsonc`, docs) out of the public asset bundle.
   - Zone hardening: `scripts/harden-cloudflare.sh` applies SSL/HTTP3/Auto Minify/etc. (idempotent; needs `CLOUDFLARE_API_TOKEN`).
   - Repo: `mosaic-climbing/lef-climbing` on GitHub. Public.
 - Local dev: `python3 -m http.server 8000` for the static pages — but `/api/events` won't work under it, so the calendar shows its error state. To preview the **live calendar locally with no npm**, run `node scripts/dev-server.mjs` (serves the site + `/api/events` on `http://localhost:8000`). `npx wrangler dev` also works but pulls wrangler via npm.

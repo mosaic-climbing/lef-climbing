@@ -15,7 +15,10 @@
   // /api/events is new.
   "assets": {
     "directory": ".",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    // Serve /404.html (with a 404 status) for any path that matches no asset.
+    // Default ("none") returns an empty 404 body.
+    "not_found_handling": "404-page"
   },
   // Per-IP rate limit for /api/events (Cloudflare's built-in engine; period
   // units are 10s or 60s). namespace_id is arbitrary but unique within the
